@@ -73,6 +73,7 @@ type LoginMgr struct {
 	heartbeatCmdCh     chan common.Cmd2Value
 	pushMsgAndMaxSeqCh chan common.Cmd2Value
 	joinedSuperGroupCh chan common.Cmd2Value
+	groupAndMemberCh   chan common.Cmd2Value
 	imConfig           sdk_struct.IMConfig
 
 	id2MinSeq map[string]uint32
@@ -240,6 +241,18 @@ func (u *LoginMgr) wakeUp(cb open_im_sdk_callback.Base, operationID string) {
 	common.CheckAnyErrCallback(cb, 2001, err, operationID)
 	cb.OnSuccess("")
 }
+func (u *LoginMgr) syncGroupInfo(operationID string) {
+	for {
+		select {
+		case _ = <-u.groupAndMemberCh:
+			u.group.SyncJoinedGroupList(operationID)
+			u.group.SyncJoinedGroupMemberForFirstLogin(operationID)
+			return
+
+		}
+
+	}
+}
 
 func (u *LoginMgr) login(userID, token string, cb open_im_sdk_callback.Base, operationID string) {
 	log.Info(operationID, "login start... ", userID, token, sdk_struct.SvrConf)
@@ -249,8 +262,8 @@ func (u *LoginMgr) login(userID, token string, cb open_im_sdk_callback.Base, ope
 	var sqliteConn *db.DataBase
 	var err error
 	if constant.OnlyForTest == 1 {
-		wsConn := ws.NewWsConn(u.connListener, u.token, u.loginUserID, u.imConfig.IsCompression, u.conversationCh)
 		wsRespAsyn := ws.NewWsRespAsyn()
+		wsConn := ws.NewWsConn(u.connListener, wsRespAsyn, u.token, u.loginUserID, u.imConfig.IsCompression, u.conversationCh)
 		u.ws = ws.NewWs(wsRespAsyn, wsConn, u.cmdWsCh, u.pushMsgAndMaxSeqCh, u.heartbeatCmdCh, u.conversationCh)
 		u.heartbeat = heartbeart.NewHeartbeat(u.msgSync, u.heartbeatCmdCh, u.connListener, u.token, u.id2MinSeq, u.full)
 		u.heartbeat.WsForTest = u.ws
@@ -276,6 +289,7 @@ func (u *LoginMgr) login(userID, token string, cb open_im_sdk_callback.Base, ope
 	u.pushMsgAndMaxSeqCh = make(chan common.Cmd2Value, 1000)
 
 	u.joinedSuperGroupCh = make(chan common.Cmd2Value, 10)
+	u.groupAndMemberCh = make(chan common.Cmd2Value, 1)
 
 	u.id2MinSeq = make(map[string]uint32, 100)
 	p := ws.NewPostApi(token, sdk_struct.SvrConf.ApiAddr)
@@ -309,8 +323,8 @@ func (u *LoginMgr) login(userID, token string, cb open_im_sdk_callback.Base, ope
 	log.Info(operationID, "forcedSynchronization success...", "login cost time: ", time.Since(t1))
 	log.Info(operationID, "all channel ", u.pushMsgAndMaxSeqCh, u.conversationCh, u.heartbeatCmdCh, u.cmdWsCh)
 
-	wsConn := ws.NewWsConn(u.connListener, u.token, u.loginUserID, u.imConfig.IsCompression, u.conversationCh)
 	wsRespAsyn := ws.NewWsRespAsyn()
+	wsConn := ws.NewWsConn(u.connListener, wsRespAsyn, u.token, u.loginUserID, u.imConfig.IsCompression, u.conversationCh)
 	u.ws = ws.NewWs(wsRespAsyn, wsConn, u.cmdWsCh, u.pushMsgAndMaxSeqCh, u.heartbeatCmdCh, u.conversationCh)
 	u.msgSync = ws.NewMsgSync(u.db, u.ws, u.loginUserID, u.conversationCh, u.pushMsgAndMaxSeqCh, u.joinedSuperGroupCh)
 	u.heartbeat = heartbeart.NewHeartbeat(u.msgSync, u.heartbeatCmdCh, u.connListener, u.token, u.id2MinSeq, u.full)
@@ -348,12 +362,14 @@ func (u *LoginMgr) login(userID, token string, cb open_im_sdk_callback.Base, ope
 	u.conversation.SyncConversations(operationID, time.Second*2)
 	go u.conversation.SyncConversationUnreadCount(operationID)
 	go common.DoListener(u.conversation)
+	go u.syncGroupInfo(operationID)
 	log.Debug(operationID, "SyncConversations end ")
 	go u.conversation.FixVersionData()
 	log.Info(operationID, "ws heartbeat end ")
 
 	log.Info(operationID, "login success...", "login cost time: ", time.Since(t1))
 	cb.OnSuccess("")
+	u.groupAndMemberCh <- common.Cmd2Value{}
 }
 
 func (u *LoginMgr) InitSDK(config sdk_struct.IMConfig, listener open_im_sdk_callback.OnConnListener, operationID string) bool {
@@ -364,6 +380,9 @@ func (u *LoginMgr) InitSDK(config sdk_struct.IMConfig, listener open_im_sdk_call
 	}
 	u.connListener = listener
 	return true
+}
+func (u *LoginMgr) UnInitSDK() {
+	u.imConfig = sdk_struct.IMConfig{}
 }
 
 func (u *LoginMgr) logout(callback open_im_sdk_callback.Base, operationID string) {
@@ -462,7 +481,7 @@ func (u *LoginMgr) forcedSynchronization() {
 
 	log.Info(operationID, "sync all info begin")
 	var wg sync.WaitGroup
-	wg.Add(10)
+	wg.Add(8)
 	go func() {
 		u.user.SyncLoginUserInfo(operationID)
 		u.friend.SyncFriendList(operationID)
@@ -485,11 +504,6 @@ func (u *LoginMgr) forcedSynchronization() {
 	}()
 
 	go func() {
-		u.group.SyncJoinedGroupList(operationID)
-		wg.Done()
-	}()
-
-	go func() {
 		u.group.SyncAdminGroupApplication(operationID)
 		wg.Done()
 	}()
@@ -499,10 +513,6 @@ func (u *LoginMgr) forcedSynchronization() {
 		wg.Done()
 	}()
 
-	go func() {
-		u.group.SyncJoinedGroupMemberForFirstLogin(operationID)
-		wg.Done()
-	}()
 	if u.organizationListener != nil {
 		go func() {
 			u.organization.SyncOrganization(operationID)
