@@ -1,3 +1,4 @@
+//go:build js && wasm
 // +build js,wasm
 
 package wasm_wrapper
@@ -53,11 +54,6 @@ func (s *SetListener) setUserListener() {
 	open_im_sdk.SetUserListener(callback)
 }
 
-func (s *SetListener) setSignalingListener() {
-	callback := event_listener.NewSignalingCallback(s.commonFunc)
-	open_im_sdk.SetSignalingListener(callback)
-}
-
 func (s *SetListener) SetAllListener() {
 	s.setConversationListener()
 	s.setAdvancedMsgListener()
@@ -65,7 +61,6 @@ func (s *SetListener) SetAllListener() {
 	s.setFriendListener()
 	s.setGroupListener()
 	s.setUserListener()
-	s.setSignalingListener()
 }
 
 type WrapperCommon struct {
