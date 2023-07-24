@@ -9,7 +9,6 @@ import (
 	"open_im_sdk/internal/full"
 	"open_im_sdk/internal/group"
 	ws "open_im_sdk/internal/interaction"
-	"open_im_sdk/internal/organization"
 	"open_im_sdk/internal/signaling"
 	"open_im_sdk/internal/user"
 	sdk "open_im_sdk/pkg/sdk_params_callback"
@@ -56,7 +55,6 @@ type Conversation struct {
 	user                 *user.User
 	signaling            *signaling.LiveSignaling
 	//advancedFunction     advanced_interface.AdvancedFunction
-	organization *organization.Organization
 	workMoments  *workMoments.WorkMoments
 	business     *business.Business
 	common2.ObjectStorage
@@ -102,11 +100,11 @@ func NewConversation(ws *ws.Ws, db db_interface.DataBase, p *ws.PostApi,
 	ch chan common.Cmd2Value, loginUserID string, platformID int32, dataDir, encryptionKey string,
 	friend *friend.Friend, group *group.Group, user *user.User,
 	objectStorage common2.ObjectStorage, conversationListener open_im_sdk_callback.OnConversationListener,
-	msgListener open_im_sdk_callback.OnAdvancedMsgListener, organization *organization.Organization, signaling *signaling.LiveSignaling,
+	msgListener open_im_sdk_callback.OnAdvancedMsgListener, signaling *signaling.LiveSignaling,
 	workMoments *workMoments.WorkMoments, business *business.Business, cache *cache.Cache, full *full.Full, id2MinSeq map[string]uint32, isExternalExtensions bool) *Conversation {
 	n := &Conversation{Ws: ws, db: db, p: p, recvCH: ch, loginUserID: loginUserID, platformID: platformID,
 		DataDir: dataDir, friend: friend, group: group, user: user, ObjectStorage: objectStorage,
-		signaling: signaling, organization: organization, workMoments: workMoments,
+		signaling: signaling, workMoments: workMoments,
 		full: full, id2MinSeq: id2MinSeq, encryptionKey: encryptionKey, business: business, IsExternalExtensions: isExternalExtensions}
 	n.SetMsgListener(msgListener)
 	n.SetConversationListener(conversationListener)
@@ -255,9 +253,6 @@ func (c *Conversation) doMsgNew(c2v common.Cmd2Value) {
 				log.Info(operationID, "signaling DoNotification ", v)
 				c.signaling.DoNotification(v, c.GetCh(), operationID)
 				continue
-			} else if v.ContentType == constant.OrganizationChangedNotification {
-				log.Info(operationID, "Organization Changed Notification ")
-				c.organization.DoNotification(v, c.GetCh(), operationID)
 			} else if v.ContentType == constant.WorkMomentNotification {
 				log.Info(operationID, "WorkMoment New Notification")
 				c.workMoments.DoNotification(tips.JsonDetail, operationID, v.ClientMsgID)
@@ -673,10 +668,7 @@ func (c *Conversation) doSuperGroupMsgNew(c2v common.Cmd2Value) {
 				log.Info(operationID, "signaling DoNotification ", v)
 				c.signaling.DoNotification(v, c.GetCh(), operationID)
 				continue
-			} else if v.ContentType == constant.OrganizationChangedNotification {
-				log.Info(operationID, "Organization Changed Notification ")
-				c.organization.DoNotification(v, c.GetCh(), operationID)
-			} else if v.ContentType == constant.WorkMomentNotification {
+			}  else if v.ContentType == constant.WorkMomentNotification {
 				log.Info(operationID, "WorkMoment New Notification")
 				c.workMoments.DoNotification(tips.JsonDetail, operationID, v.ClientMsgID)
 			}

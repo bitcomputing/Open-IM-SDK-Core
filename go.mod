@@ -29,6 +29,7 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.33
 	github.com/tencentyun/qcloud-cos-sts-sdk v0.0.0-20220106031843-2efeb10ca2f6
+	golang.org/x/mobile v0.0.0-20230531173138-3c911d8e3eda // indirect
 	golang.org/x/time v0.0.0-20220224211638-0e9765cccd65 // indirect
 	google.golang.org/protobuf v1.28.0
 	gorm.io/driver/sqlite v1.3.6
