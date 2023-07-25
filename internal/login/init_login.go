@@ -437,22 +437,6 @@ func (u *LoginMgr) forcedSynchronization() {
 	wg.Add(8)
 	go func() {
 		u.user.SyncLoginUserInfo(operationID)
-		u.friend.SyncFriendList(operationID)
-		wg.Done()
-	}()
-
-	go func() {
-		u.friend.SyncBlackList(operationID)
-		wg.Done()
-	}()
-
-	go func() {
-		u.friend.SyncFriendApplication(operationID)
-		wg.Done()
-	}()
-
-	go func() {
-		u.friend.SyncSelfFriendApplication(operationID)
 		wg.Done()
 	}()
 
@@ -474,7 +458,6 @@ func (u *LoginMgr) forcedSynchronization() {
 
 	u.loginTime = utils.GetCurrentTimestampByMill()
 	u.user.SetLoginTime(u.loginTime)
-	u.friend.SetLoginTime(u.loginTime)
 	u.group.SetLoginTime(u.loginTime)
 	u.superGroup.SetLoginTime(u.loginTime)
 	log.Info(operationID, "login init sync finished")
