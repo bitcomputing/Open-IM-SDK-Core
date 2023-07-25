@@ -10,7 +10,6 @@ import (
 	X "log"
 	"open_im_sdk/open_im_sdk"
 	"open_im_sdk/pkg/log"
-	"open_im_sdk/pkg/sdk_params_callback"
 	"open_im_sdk/pkg/utils"
 	"open_im_sdk/sdk_struct"
 	"os"
@@ -58,14 +57,6 @@ type testGetFriendApplicationList struct {
 	baseCallback
 }
 
-func DoTestGetFriendApplicationList() {
-	var test testGetFriendApplicationList
-	test.OperationID = utils.OperationIDGenerator()
-	log.Info(test.OperationID, utils.GetSelfFuncName(), "input ")
-	open_im_sdk.GetRecvFriendApplicationList(test, test.OperationID)
-
-}
-
 // ////////////////////////////////////////////////////////`
 type testSetSelfInfo struct {
 	baseCallback
@@ -108,15 +99,6 @@ func (testGetFriendsInfo) OnError(code int32, msg string) {
 	fmt.Println("DoTestGetDesignatedFriendsInfo, OnError, ", code, msg)
 }
 
-func DoTestGetDesignatedFriendsInfo() {
-	var test testGetFriendsInfo
-	test.uid = append(test.uid, Friend_uid)
-
-	jsontest, _ := json.Marshal(test.uid)
-	fmt.Println("testGetFriendsInfo, input: ", string(jsontest))
-	open_im_sdk.GetDesignatedFriendsInfo(test, "xxxxxxxxxxx", string(jsontest))
-}
-
 // /////////////////////////////////////////////////////
 type testAddToBlackList struct {
 	OperationID string
@@ -130,24 +112,7 @@ func (t testAddToBlackList) OnError(code int32, msg string) {
 	log.Info(t.OperationID, "testAddToBlackList, OnError, ", code, msg)
 }
 
-func DoTestAddToBlackList() {
-	var test testAddToBlackList
-	test.OperationID = utils.OperationIDGenerator()
-	fmt.Println("AddToBlackList, input: ", Friend_uid)
-	open_im_sdk.AddBlack(test, test.OperationID, Friend_uid)
-}
-
 // /////////////////////////////////////////////////////
-type testDeleteFromBlackList struct {
-	baseCallback
-}
-
-func DoTestDeleteFromBlackList() {
-	var test testDeleteFromBlackList
-	test.OperationID = utils.OperationIDGenerator()
-	fmt.Println("DeleteFromBlackList, input: ")
-	open_im_sdk.RemoveBlack(test, test.OperationID, Friend_uid)
-}
 
 // ////////////////////////////////////////////////////
 type testGetBlackList struct {
@@ -159,11 +124,6 @@ func (t testGetBlackList) OnSuccess(data string) {
 }
 func (t testGetBlackList) OnError(code int32, msg string) {
 	log.Info(t.OperationID, "testGetBlackList, OnError, ", code, msg)
-}
-func DoTestGetBlackList() {
-	var test testGetBlackList
-	test.OperationID = utils.OperationIDGenerator()
-	open_im_sdk.GetBlackList(test, test.OperationID)
 }
 
 //////////////////////////////////////////////////////
@@ -178,46 +138,8 @@ func (t testCheckFriend) OnSuccess(data string) {
 func (t testCheckFriend) OnError(code int32, msg string) {
 	log.Info(t.OperationID, "testCheckFriend, OnError, ", code, msg)
 }
-func DoTestCheckFriend() {
-	var test testCheckFriend
-	test.OperationID = utils.OperationIDGenerator()
-	userIDList := []string{"openIM100"}
-	list := utils.StructToJsonString(userIDList)
-	fmt.Println("CheckFriend, input: ", list)
-	open_im_sdk.CheckFriend(test, test.OperationID, list)
-}
 
 // /////////////////////////////////////////////////////////
-type testSetFriendRemark struct {
-	baseCallback
-}
-
-func DotestSetFriendRemark() {
-	var test testSetFriendRemark
-	test.OperationID = utils.OperationIDGenerator()
-
-	var param sdk_params_callback.SetFriendRemarkParams
-	param.ToUserID = Friend_uid
-	param.Remark = "ttttttttttttttttt "
-	jsontest := utils.StructToJsonString(param)
-	log.Info(test.OperationID, utils.GetSelfFuncName(), "input ", jsontest)
-	open_im_sdk.SetFriendRemark(test, test.OperationID, jsontest)
-}
-
-/////////////////////
-////////////////////////////////////////////////////////
-
-type testDeleteFriend struct {
-	baseCallback
-}
-
-func DotestDeleteFriend() {
-	var test testDeleteFriend
-	test.OperationID = utils.OperationIDGenerator()
-
-	log.Info(test.OperationID, utils.GetSelfFuncName(), "input ")
-	open_im_sdk.DeleteFriend(test, test.OperationID, Friend_uid)
-}
 
 // /////////////////////////////////////////////////////
 // ///////////////////////////////////////////////////////
@@ -230,18 +152,6 @@ func (t testaddFriend) OnSuccess(data string) {
 }
 func (t testaddFriend) OnError(code int32, msg string) {
 	log.Info(t.OperationID, "testaddFriend, OnError", code, msg)
-}
-
-func DoTestAddFriend() {
-	var test testaddFriend
-	test.OperationID = utils.OperationIDGenerator()
-	params := sdk_params_callback.AddFriendParams{
-		ToUserID: Friend_uid,
-		ReqMsg:   "777777777777777777777777",
-	}
-	jsontestaddFriend := utils.StructToJsonString(params)
-	log.Info(test.OperationID, "addFriend input:", jsontestaddFriend)
-	open_im_sdk.AddFriend(test, test.OperationID, jsontestaddFriend)
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -258,41 +168,14 @@ func (t testGetSendFriendApplicationList) OnError(code int32, msg string) {
 	log.Info(t.OperationID, "testGetSendFriendApplicationList, OnError", code, msg)
 }
 
-func DoTestGetSendFriendApplicationList() {
-	var test testGetSendFriendApplicationList
-	test.OperationID = utils.OperationIDGenerator()
-	log.Info(test.OperationID, "GetSendFriendApplicationList input:")
-	open_im_sdk.GetSendFriendApplicationList(test, test.OperationID)
-}
-
 ////////////////////////////////////////////////////////////////////
 
 type testGetFriendList struct {
 	baseCallback
 }
 
-func DotestGetFriendList() {
-	var test testGetFriendList
-	test.OperationID = utils.OperationIDGenerator()
-	log.Info(test.OperationID, utils.GetSelfFuncName(), "input ")
-	open_im_sdk.GetFriendList(test, test.OperationID)
-}
-
 type testSearchFriends struct {
 	baseCallback
-}
-
-func DotestSearchFriends() {
-	var test testSearchFriends
-	test.OperationID = utils.OperationIDGenerator()
-	test.callName = "SearchFriends"
-	var params sdk_params_callback.SearchFriendsParam
-	params.KeywordList = []string{"G"}
-	params.IsSearchUserID = true
-	params.IsSearchNickname = true
-	params.IsSearchRemark = true
-	log.Info(test.OperationID, utils.GetSelfFuncName(), "input ", params)
-	open_im_sdk.SearchFriends(test, test.OperationID, utils.StructToJsonString(params))
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -301,28 +184,8 @@ type testAcceptFriendApplication struct {
 	baseCallback
 }
 
-func DoTestAcceptFriendApplication() {
-	var test testAcceptFriendApplication
-	test.OperationID = utils.OperationIDGenerator()
-	var param sdk_params_callback.ProcessFriendApplicationParams
-	param.HandleMsg = "ok ok "
-	param.ToUserID = Friend_uid
-	input := utils.StructToJsonString(param)
-	open_im_sdk.AcceptFriendApplication(test, test.OperationID, input)
-}
-
 type testRefuseFriendApplication struct {
 	baseCallback
-}
-
-func DoTestRefuseFriendApplication() {
-	var test testRefuseFriendApplication
-	test.OperationID = utils.OperationIDGenerator()
-	var param sdk_params_callback.ProcessFriendApplicationParams
-	param.HandleMsg = "nonono"
-	param.ToUserID = Friend_uid
-	input := utils.StructToJsonString(param)
-	open_im_sdk.RefuseFriendApplication(test, test.OperationID, input)
 }
 
 /*

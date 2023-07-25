@@ -133,20 +133,4 @@ func registerFunc() {
 	js.Global().Set("setSelfInfo", js.FuncOf(wrapperUser.SetSelfInfo))
 	js.Global().Set("getUsersInfo", js.FuncOf(wrapperUser.GetUsersInfo))
 
-	wrapperFriend := wasm_wrapper.NewWrapperFriend(globalFuc)
-	js.Global().Set("getDesignatedFriendsInfo", js.FuncOf(wrapperFriend.GetDesignatedFriendsInfo))
-	js.Global().Set("getFriendList", js.FuncOf(wrapperFriend.GetFriendList))
-	js.Global().Set("searchFriends", js.FuncOf(wrapperFriend.SearchFriends))
-	js.Global().Set("checkFriend", js.FuncOf(wrapperFriend.CheckFriend))
-	js.Global().Set("addFriend", js.FuncOf(wrapperFriend.AddFriend))
-	js.Global().Set("setFriendRemark", js.FuncOf(wrapperFriend.SetFriendRemark))
-	js.Global().Set("deleteFriend", js.FuncOf(wrapperFriend.DeleteFriend))
-	js.Global().Set("getRecvFriendApplicationList", js.FuncOf(wrapperFriend.GetRecvFriendApplicationList))
-	js.Global().Set("getSendFriendApplicationList", js.FuncOf(wrapperFriend.GetSendFriendApplicationList))
-	js.Global().Set("acceptFriendApplication", js.FuncOf(wrapperFriend.AcceptFriendApplication))
-	js.Global().Set("refuseFriendApplication", js.FuncOf(wrapperFriend.RefuseFriendApplication))
-	js.Global().Set("getBlackList", js.FuncOf(wrapperFriend.GetBlackList))
-	js.Global().Set("removeBlack", js.FuncOf(wrapperFriend.RemoveBlack))
-	js.Global().Set("addBlack", js.FuncOf(wrapperFriend.AddBlack))
-
 }
