@@ -460,11 +460,6 @@ func InOutDoTest(uid, tk, ws, api string) {
 
 	var groupListener testGroupListener
 	open_im_sdk.SetGroupListener(groupListener)
-	var signalingListener testSignalingListener
-	open_im_sdk.SetSignalingListener(&signalingListener)
-
-	var organizationListener testOrganizationListener
-	open_im_sdk.SetOrganizationListener(organizationListener)
 
 	InOutlllogin(uid, tk)
 
@@ -559,9 +554,6 @@ func ReliabilityInitAndLogin(index int, uid, tk, ws, api string) {
 	var groupListener testGroupListener
 	lg.SetGroupListener(groupListener)
 
-	var organizationListener testOrganizationListener
-	lg.SetOrganizationListener(organizationListener)
-
 	var callback BaseSuccessFailed
 	callback.funcName = utils.GetSelfFuncName()
 	lg.Login(&callback, uid, tk, operationID)
@@ -614,9 +606,6 @@ func PressInitAndLogin(index int, uid, tk, ws, api string) {
 	var groupListener testGroupListener
 	lg.SetGroupListener(groupListener)
 
-	var organizationListener testOrganizationListener
-	lg.SetOrganizationListener(organizationListener)
-
 	var callback BaseSuccessFailed
 	callback.funcName = utils.GetSelfFuncName()
 	lg.Login(&callback, uid, tk, operationID)
@@ -668,8 +657,6 @@ func DoTest(uid, tk, ws, api string) {
 	var groupListener testGroupListener
 	open_im_sdk.SetGroupListener(groupListener)
 
-	var signalingListener testSignalingListener
-	open_im_sdk.SetSignalingListener(&signalingListener)
 	time.Sleep(1 * time.Second)
 
 	for !lllogin(uid, tk) {

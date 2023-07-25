@@ -9,7 +9,6 @@ import (
 	"open_im_sdk/internal/full"
 	"open_im_sdk/internal/group"
 	ws "open_im_sdk/internal/interaction"
-	"open_im_sdk/internal/signaling"
 	"open_im_sdk/internal/user"
 	sdk "open_im_sdk/pkg/sdk_params_callback"
 	"runtime"
@@ -52,7 +51,6 @@ type Conversation struct {
 	friend               *friend.Friend
 	group                *group.Group
 	user                 *user.User
-	signaling            *signaling.LiveSignaling
 	//advancedFunction     advanced_interface.AdvancedFunction
 	business     *business.Business
 	common2.ObjectStorage
@@ -80,10 +78,6 @@ func (c *Conversation) MsgListener() open_im_sdk_callback.OnAdvancedMsgListener 
 	return c.msgListener
 }
 
-func (c *Conversation) SetSignaling(signaling *signaling.LiveSignaling) {
-	c.signaling = signaling
-}
-
 func (c *Conversation) SetMsgListener(msgListener open_im_sdk_callback.OnAdvancedMsgListener) {
 	c.msgListener = msgListener
 }
@@ -98,11 +92,10 @@ func NewConversation(ws *ws.Ws, db db_interface.DataBase, p *ws.PostApi,
 	ch chan common.Cmd2Value, loginUserID string, platformID int32, dataDir, encryptionKey string,
 	friend *friend.Friend, group *group.Group, user *user.User,
 	objectStorage common2.ObjectStorage, conversationListener open_im_sdk_callback.OnConversationListener,
-	msgListener open_im_sdk_callback.OnAdvancedMsgListener, signaling *signaling.LiveSignaling,
+	msgListener open_im_sdk_callback.OnAdvancedMsgListener,
 	business *business.Business, cache *cache.Cache, full *full.Full, id2MinSeq map[string]uint32, isExternalExtensions bool) *Conversation {
 	n := &Conversation{Ws: ws, db: db, p: p, recvCH: ch, loginUserID: loginUserID, platformID: platformID,
 		DataDir: dataDir, friend: friend, group: group, user: user, ObjectStorage: objectStorage,
-		signaling: signaling,
 		full: full, id2MinSeq: id2MinSeq, encryptionKey: encryptionKey, business: business, IsExternalExtensions: isExternalExtensions}
 	n.SetMsgListener(msgListener)
 	n.SetConversationListener(conversationListener)
@@ -117,16 +110,7 @@ func (c *Conversation) doMsgNew(c2v common.Cmd2Value) {
 	operationID := c2v.Value.(sdk_struct.CmdNewMsgComeToConversation).OperationID
 	allMsg := c2v.Value.(sdk_struct.CmdNewMsgComeToConversation).MsgList
 	syncFlag := c2v.Value.(sdk_struct.CmdNewMsgComeToConversation).SyncFlag
-	if c.msgListener == nil || c.ConversationListener == nil {
-		for _, v := range allMsg {
-			if v.ContentType > constant.SignalingNotificationBegin && v.ContentType < constant.SignalingNotificationEnd {
-				log.Info(operationID, "signaling DoNotification ", v, "signaling:", c.signaling)
-				c.signaling.DoNotification(v, c.GetCh(), operationID)
-			} else {
-				log.Info(operationID, "listener is nil, do nothing ", v)
-			}
-		}
-	}
+
 	if c.msgListener == nil {
 		log.Error(operationID, "not set c MsgListenerList")
 		return
@@ -248,8 +232,6 @@ func (c *Conversation) doMsgNew(c2v common.Cmd2Value) {
 				log.Info(operationID, "DoGroupMsg SingleChatType", v)
 				c.group.DoNotification(v, c.GetCh())
 			} else if v.ContentType > constant.SignalingNotificationBegin && v.ContentType < constant.SignalingNotificationEnd {
-				log.Info(operationID, "signaling DoNotification ", v)
-				c.signaling.DoNotification(v, c.GetCh(), operationID)
 				continue
 			}
 		case constant.GroupChatType, constant.SuperGroupChatType:
@@ -257,8 +239,6 @@ func (c *Conversation) doMsgNew(c2v common.Cmd2Value) {
 				c.group.DoNotification(v, c.GetCh())
 				log.Info(operationID, "DoGroupMsg SingleChatType", v)
 			} else if v.ContentType > constant.SignalingNotificationBegin && v.ContentType < constant.SignalingNotificationEnd {
-				log.Info(operationID, "signaling DoNotification ", v)
-				c.signaling.DoNotification(v, c.GetCh(), operationID)
 				continue
 			}
 		}
@@ -660,8 +640,6 @@ func (c *Conversation) doSuperGroupMsgNew(c2v common.Cmd2Value) {
 				log.Info(operationID, "DoGroupMsg SingleChatType", v)
 				c.group.DoNotification(v, c.GetCh())
 			} else if v.ContentType > constant.SignalingNotificationBegin && v.ContentType < constant.SignalingNotificationEnd {
-				log.Info(operationID, "signaling DoNotification ", v)
-				c.signaling.DoNotification(v, c.GetCh(), operationID)
 				continue
 			}
 		case constant.GroupChatType, constant.SuperGroupChatType:
@@ -669,8 +647,6 @@ func (c *Conversation) doSuperGroupMsgNew(c2v common.Cmd2Value) {
 				c.group.DoNotification(v, c.GetCh())
 				log.Info(operationID, "DoGroupMsg SingleChatType", v)
 			} else if v.ContentType > constant.SignalingNotificationBegin && v.ContentType < constant.SignalingNotificationEnd {
-				log.Info(operationID, "signaling DoNotification ", v)
-				c.signaling.DoNotification(v, c.GetCh(), operationID)
 				continue
 			}
 		}

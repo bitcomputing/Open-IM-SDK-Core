@@ -11,7 +11,6 @@ import (
 	"open_im_sdk/internal/heartbeart"
 	ws "open_im_sdk/internal/interaction"
 	comm2 "open_im_sdk/internal/obj_storage"
-	"open_im_sdk/internal/signaling"
 	"open_im_sdk/internal/super_group"
 	"open_im_sdk/internal/user"
 	"open_im_sdk/open_im_sdk_callback"
@@ -33,7 +32,6 @@ type LoginMgr struct {
 	superGroup   *super_group.SuperGroup
 	conversation *conv.Conversation
 	user         *user.User
-	signaling    *signaling.LiveSignaling
 	//advancedFunction advanced_interface.AdvancedFunction
 	business    *business.Business
 
@@ -52,15 +50,13 @@ type LoginMgr struct {
 
 	justOnceFlag bool
 
-	groupListener               open_im_sdk_callback.OnGroupListener
-	friendListener              open_im_sdk_callback.OnFriendshipListener
-	conversationListener        open_im_sdk_callback.OnConversationListener
-	advancedMsgListener         open_im_sdk_callback.OnAdvancedMsgListener
-	batchMsgListener            open_im_sdk_callback.OnBatchMsgListener
-	userListener                open_im_sdk_callback.OnUserListener
-	signalingListener           open_im_sdk_callback.OnSignalingListener
-	signalingListenerFroService open_im_sdk_callback.OnSignalingListener
-	businessListener            open_im_sdk_callback.OnCustomBusinessListener
+	groupListener        open_im_sdk_callback.OnGroupListener
+	friendListener       open_im_sdk_callback.OnFriendshipListener
+	conversationListener open_im_sdk_callback.OnConversationListener
+	advancedMsgListener  open_im_sdk_callback.OnAdvancedMsgListener
+	batchMsgListener     open_im_sdk_callback.OnBatchMsgListener
+	userListener         open_im_sdk_callback.OnUserListener
+	businessListener     open_im_sdk_callback.OnCustomBusinessListener
 
 	conversationCh     chan common.Cmd2Value
 	cmdWsCh            chan common.Cmd2Value
@@ -108,10 +104,6 @@ func (u *LoginMgr) Group() *group.Group {
 
 func (u *LoginMgr) Friend() *friend.Friend {
 	return u.friend
-}
-
-func (u *LoginMgr) Signaling() *signaling.LiveSignaling {
-	return u.signaling
 }
 
 func (u *LoginMgr) SetConversationListener(conversationListener open_im_sdk_callback.OnConversationListener) {
@@ -168,22 +160,6 @@ func (u *LoginMgr) SetUserListener(userListener open_im_sdk_callback.OnUserListe
 		u.user.SetListener(userListener)
 	} else {
 		u.userListener = userListener
-	}
-}
-
-func (u *LoginMgr) SetSignalingListener(listener open_im_sdk_callback.OnSignalingListener) {
-	if u.signaling != nil {
-		u.signaling.SetListener(listener)
-	} else {
-		u.signalingListener = listener
-	}
-}
-
-func (u *LoginMgr) SetSignalingListenerForService(listener open_im_sdk_callback.OnSignalingListener) {
-	if u.signaling != nil {
-		u.signaling.SetListenerForService(listener)
-	} else {
-		u.signalingListenerFroService = listener
 	}
 }
 
@@ -308,17 +284,11 @@ func (u *LoginMgr) login(userID, token string, cb open_im_sdk_callback.Base, ope
 	default:
 		objStorage = comm2.NewCOS(u.postApi)
 	}
-	u.signaling = signaling.NewLiveSignaling(u.ws, u.loginUserID, u.imConfig.Platform, u.db)
-	if u.signalingListener != nil {
-		u.signaling.SetListener(u.signalingListener)
-	}
-	if u.signalingListenerFroService != nil {
-		u.signaling.SetListenerForService(u.signalingListenerFroService)
-	}
+
 	u.conversation = conv.NewConversation(u.ws, u.db, u.postApi, u.conversationCh,
 		u.loginUserID, u.imConfig.Platform, u.imConfig.DataDir, u.imConfig.EncryptionKey,
 		u.friend, u.group, u.user, objStorage, u.conversationListener, u.advancedMsgListener,
-		u.signaling, u.business, u.cache, u.full, u.id2MinSeq, u.imConfig.IsExternalExtensions)
+	 	u.business, u.cache, u.full, u.id2MinSeq, u.imConfig.IsExternalExtensions)
 	if u.batchMsgListener != nil {
 		u.conversation.SetBatchMsgListener(u.batchMsgListener)
 		log.Info(operationID, "SetBatchMsgListener ", u.batchMsgListener)

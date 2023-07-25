@@ -28,7 +28,7 @@ type BaseSuccessFailed struct {
 	uid         string
 }
 
-//e.g open_im_sdk/open_im_sdk.Login ->Login
+// e.g open_im_sdk/open_im_sdk.Login ->Login
 func cleanUpfuncName(funcName string) string {
 	end := strings.LastIndex(funcName, ".")
 	if end == -1 {
@@ -132,8 +132,6 @@ func GenUserRouterNoLock(uid string, batchMsg int, operationID string) *RefRoute
 	wsRouter1.SetGroupListener()
 	log.Info(operationID, "SetUserListener() ", uid)
 	wsRouter1.SetUserListener()
-	log.Info(operationID, "SetSignalingListener() ", uid)
-	wsRouter1.SetSignalingListener()
 	var rr RefRouter
 	rr.refName = RouteMap1
 	rr.wsRouter = &wsRouter1
@@ -146,7 +144,7 @@ func (wsRouter *WsFuncRouter) GlobalSendMessage(data interface{}) {
 	SendOneUserMessage(data, wsRouter.uId)
 }
 
-//listener
+// listener
 func SendOneUserMessage(data interface{}, uid string) {
 	var chMsg ChanMsg
 	chMsg.data, _ = json.Marshal(data)
