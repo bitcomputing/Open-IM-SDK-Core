@@ -14,7 +14,6 @@ import (
 	"open_im_sdk/internal/signaling"
 	"open_im_sdk/internal/super_group"
 	"open_im_sdk/internal/user"
-	workMoments "open_im_sdk/internal/work_moments"
 	"open_im_sdk/open_im_sdk_callback"
 	"open_im_sdk/pkg/common"
 	"open_im_sdk/pkg/constant"
@@ -36,7 +35,6 @@ type LoginMgr struct {
 	user         *user.User
 	signaling    *signaling.LiveSignaling
 	//advancedFunction advanced_interface.AdvancedFunction
-	workMoments *workMoments.WorkMoments
 	business    *business.Business
 
 	full         *full.Full
@@ -62,7 +60,6 @@ type LoginMgr struct {
 	userListener                open_im_sdk_callback.OnUserListener
 	signalingListener           open_im_sdk_callback.OnSignalingListener
 	signalingListenerFroService open_im_sdk_callback.OnSignalingListener
-	workMomentsListener         open_im_sdk_callback.OnWorkMomentsListener
 	businessListener            open_im_sdk_callback.OnCustomBusinessListener
 
 	conversationCh     chan common.Cmd2Value
@@ -115,10 +112,6 @@ func (u *LoginMgr) Friend() *friend.Friend {
 
 func (u *LoginMgr) Signaling() *signaling.LiveSignaling {
 	return u.signaling
-}
-
-func (u *LoginMgr) WorkMoments() *workMoments.WorkMoments {
-	return u.workMoments
 }
 
 func (u *LoginMgr) SetConversationListener(conversationListener open_im_sdk_callback.OnConversationListener) {
@@ -204,14 +197,6 @@ func (u *LoginMgr) SetListenerForService(listener open_im_sdk_callback.OnListene
 	u.conversation.SetListenerForService(listener)
 }
 
-func (u *LoginMgr) SetWorkMomentsListener(listener open_im_sdk_callback.OnWorkMomentsListener) {
-	if u.workMoments != nil {
-		u.workMoments.SetListener(listener)
-	} else {
-		u.workMomentsListener = listener
-	}
-}
-
 func (u *LoginMgr) SetBusinessListener(listener open_im_sdk_callback.OnCustomBusinessListener) {
 	if u.business != nil {
 		u.business.SetListener(listener)
@@ -290,10 +275,7 @@ func (u *LoginMgr) login(userID, token string, cb open_im_sdk_callback.Base, ope
 	u.superGroup = super_group.NewSuperGroup(u.loginUserID, u.db, p, u.joinedSuperGroupCh, u.heartbeatCmdCh)
 	u.cache = cache.NewCache(u.user, u.friend)
 	u.full = full.NewFull(u.user, u.friend, u.group, u.conversationCh, u.cache, u.db, u.superGroup)
-	u.workMoments = workMoments.NewWorkMoments(u.loginUserID, u.db, p)
-	if u.workMomentsListener != nil {
-		u.workMoments.SetListener(u.workMomentsListener)
-	}
+
 	u.business = business.NewBusiness(u.db)
 	if u.businessListener != nil {
 		u.business.SetListener(u.businessListener)
@@ -336,7 +318,7 @@ func (u *LoginMgr) login(userID, token string, cb open_im_sdk_callback.Base, ope
 	u.conversation = conv.NewConversation(u.ws, u.db, u.postApi, u.conversationCh,
 		u.loginUserID, u.imConfig.Platform, u.imConfig.DataDir, u.imConfig.EncryptionKey,
 		u.friend, u.group, u.user, objStorage, u.conversationListener, u.advancedMsgListener,
-		u.signaling, u.workMoments, u.business, u.cache, u.full, u.id2MinSeq, u.imConfig.IsExternalExtensions)
+		u.signaling, u.business, u.cache, u.full, u.id2MinSeq, u.imConfig.IsExternalExtensions)
 	if u.batchMsgListener != nil {
 		u.conversation.SetBatchMsgListener(u.batchMsgListener)
 		log.Info(operationID, "SetBatchMsgListener ", u.batchMsgListener)

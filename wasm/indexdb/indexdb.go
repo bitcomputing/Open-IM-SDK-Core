@@ -500,38 +500,6 @@ func (i IndexDB) GetDepartmentMemberListByUserID(userID string) ([]*model_struct
 	panic("implement me")
 }
 
-func (i IndexDB) InsertWorkMomentsNotification(jsonDetail, clientMsgID string) error {
-	panic("implement me")
-}
-
-func (i IndexDB) GetWorkMomentsNotification(offset, count int) (WorkMomentsNotifications []*db.LocalWorkMomentsNotification, err error) {
-	panic("implement me")
-}
-
-func (i IndexDB) GetWorkMomentsNotificationLimit(pageNumber, showNumber int) (WorkMomentsNotifications []*db.LocalWorkMomentsNotification, err error) {
-	panic("implement me")
-}
-
-func (i IndexDB) InitWorkMomentsNotificationUnreadCount() error {
-	panic("implement me")
-}
-
-func (i IndexDB) IncrWorkMomentsNotificationUnreadCount() error {
-	panic("implement me")
-}
-
-func (i IndexDB) MarkAllWorkMomentsNotificationAsRead() (err error) {
-	panic("implement me")
-}
-
-func (i IndexDB) GetWorkMomentsUnReadCount() (workMomentsNotificationUnReadCount db.LocalWorkMomentsNotificationUnreadCount, err error) {
-	panic("implement me")
-}
-
-func (i IndexDB) ClearWorkMomentsNotification() (err error) {
-	panic("implement me")
-}
-
 func (i IndexDB) Close() error {
 	_, err := Exec()
 	return err

@@ -187,8 +187,6 @@ func (d *DataBase) initDB() error {
 		&model_struct.LocalAdminGroupRequest{},
 		&model_struct.LocalDepartment{},
 		&model_struct.LocalDepartmentMember{},
-		// &LocalWorkMomentsNotification{},
-		&LocalWorkMomentsNotificationUnreadCount{},
 		&model_struct.TempCacheLocalChatLog{},
 		&model_struct.LocalChatLogReactionExtensions{},
 	)
@@ -272,22 +270,9 @@ func (d *DataBase) initDB() error {
 	if !db.Migrator().HasTable(&model_struct.LocalDepartmentMember{}) {
 		db.Migrator().CreateTable(&model_struct.LocalDepartmentMember{})
 	}
-	if !db.Migrator().HasTable(&LocalWorkMomentsNotification{}) {
-		db.Migrator().CreateTable(&LocalWorkMomentsNotification{})
-	}
-	if !db.Migrator().HasTable(&LocalWorkMomentsNotificationUnreadCount{}) {
-		db.Migrator().CreateTable(&LocalWorkMomentsNotificationUnreadCount{})
-	}
 	if !db.Migrator().HasTable(&model_struct.LocalChatLogReactionExtensions{}) {
 		db.Migrator().CreateTable(&model_struct.LocalChatLogReactionExtensions{})
 	}
-	if err := d.InitWorkMoment(); err != nil {
-		log.NewError("init work moment:", utils.GetSelfFuncName(), err.Error())
-	}
-	// log.NewInfo("init db", "startInitWorkMomentsNotificationUnreadCount ")
-	// if err := d.InitWorkMomentsNotificationUnreadCount(); err != nil {
-	// 	log.NewError("init InitWorkMomentsNotificationUnreadCount:", utils.GetSelfFuncName(), err.Error())
-	// }
 	return nil
 }
 

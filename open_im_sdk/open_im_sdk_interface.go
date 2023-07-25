@@ -783,13 +783,6 @@ func SetUserListener(listener open_im_sdk_callback.OnUserListener) {
 	userForSDK.SetUserListener(listener)
 }
 
-func SetWorkMomentsListener(listener open_im_sdk_callback.OnWorkMomentsListener) {
-	if listener == nil || userForSDK == nil {
-		log.Error("callback or userForSDK is nil")
-		return
-	}
-	userForSDK.SetWorkMomentsListener(listener)
-}
 
 func SetCustomBusinessListener(listener open_im_sdk_callback.OnCustomBusinessListener) {
 	if listener == nil || userForSDK == nil {
@@ -1284,33 +1277,6 @@ func SignalingGetTokenByRoomID(callback open_im_sdk_callback.Base, operationID, 
 	userForSDK.Signaling().SignalingGetTokenByRoomID(callback, groupID, operationID)
 }
 
-// workMomentsInterface
-func GetWorkMomentsUnReadCount(callback open_im_sdk_callback.Base, operationID string) {
-	if err := CheckResourceLoad(userForSDK); err != nil {
-		log.Error(operationID, "resource loading is not completed ", err.Error())
-		callback.OnError(constant.ErrResourceLoadNotComplete.ErrCode, constant.ErrResourceLoadNotComplete.ErrMsg)
-		return
-	}
-	userForSDK.WorkMoments().GetWorkMomentsUnReadCount(callback, operationID)
-}
-
-func GetWorkMomentsNotification(callback open_im_sdk_callback.Base, operationID string, offset, count int) {
-	if err := CheckResourceLoad(userForSDK); err != nil {
-		log.Error(operationID, "resource loading is not completed ", err.Error())
-		callback.OnError(constant.ErrResourceLoadNotComplete.ErrCode, constant.ErrResourceLoadNotComplete.ErrMsg)
-		return
-	}
-	userForSDK.WorkMoments().GetWorkMomentsNotification(callback, offset, count, operationID)
-}
-
-func ClearWorkMomentsNotification(callback open_im_sdk_callback.Base, operationID string) {
-	if err := CheckResourceLoad(userForSDK); err != nil {
-		log.Error(operationID, "resource loading is not completed ", err.Error())
-		callback.OnError(constant.ErrResourceLoadNotComplete.ErrCode, constant.ErrResourceLoadNotComplete.ErrMsg)
-		return
-	}
-	userForSDK.WorkMoments().ClearWorkMomentsNotification(callback, operationID)
-}
 func UpdateFcmToken(callback open_im_sdk_callback.Base, operationID, fmcToken string) {
 	if err := CheckResourceLoad(userForSDK); err != nil {
 		log.Error(operationID, "resource loading is not completed ", err.Error())

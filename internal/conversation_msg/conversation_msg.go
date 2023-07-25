@@ -17,7 +17,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	workMoments "open_im_sdk/internal/work_moments"
 	"open_im_sdk/open_im_sdk_callback"
 	"open_im_sdk/pkg/common"
 	"open_im_sdk/pkg/constant"
@@ -55,7 +54,6 @@ type Conversation struct {
 	user                 *user.User
 	signaling            *signaling.LiveSignaling
 	//advancedFunction     advanced_interface.AdvancedFunction
-	workMoments  *workMoments.WorkMoments
 	business     *business.Business
 	common2.ObjectStorage
 
@@ -101,10 +99,10 @@ func NewConversation(ws *ws.Ws, db db_interface.DataBase, p *ws.PostApi,
 	friend *friend.Friend, group *group.Group, user *user.User,
 	objectStorage common2.ObjectStorage, conversationListener open_im_sdk_callback.OnConversationListener,
 	msgListener open_im_sdk_callback.OnAdvancedMsgListener, signaling *signaling.LiveSignaling,
-	workMoments *workMoments.WorkMoments, business *business.Business, cache *cache.Cache, full *full.Full, id2MinSeq map[string]uint32, isExternalExtensions bool) *Conversation {
+	business *business.Business, cache *cache.Cache, full *full.Full, id2MinSeq map[string]uint32, isExternalExtensions bool) *Conversation {
 	n := &Conversation{Ws: ws, db: db, p: p, recvCH: ch, loginUserID: loginUserID, platformID: platformID,
 		DataDir: dataDir, friend: friend, group: group, user: user, ObjectStorage: objectStorage,
-		signaling: signaling, workMoments: workMoments,
+		signaling: signaling,
 		full: full, id2MinSeq: id2MinSeq, encryptionKey: encryptionKey, business: business, IsExternalExtensions: isExternalExtensions}
 	n.SetMsgListener(msgListener)
 	n.SetConversationListener(conversationListener)
@@ -253,9 +251,6 @@ func (c *Conversation) doMsgNew(c2v common.Cmd2Value) {
 				log.Info(operationID, "signaling DoNotification ", v)
 				c.signaling.DoNotification(v, c.GetCh(), operationID)
 				continue
-			} else if v.ContentType == constant.WorkMomentNotification {
-				log.Info(operationID, "WorkMoment New Notification")
-				c.workMoments.DoNotification(tips.JsonDetail, operationID, v.ClientMsgID)
 			}
 		case constant.GroupChatType, constant.SuperGroupChatType:
 			if v.ContentType > constant.GroupNotificationBegin && v.ContentType < constant.GroupNotificationEnd {
@@ -668,9 +663,6 @@ func (c *Conversation) doSuperGroupMsgNew(c2v common.Cmd2Value) {
 				log.Info(operationID, "signaling DoNotification ", v)
 				c.signaling.DoNotification(v, c.GetCh(), operationID)
 				continue
-			}  else if v.ContentType == constant.WorkMomentNotification {
-				log.Info(operationID, "WorkMoment New Notification")
-				c.workMoments.DoNotification(tips.JsonDetail, operationID, v.ClientMsgID)
 			}
 		case constant.GroupChatType, constant.SuperGroupChatType:
 			if v.ContentType > constant.GroupNotificationBegin && v.ContentType < constant.GroupNotificationEnd {

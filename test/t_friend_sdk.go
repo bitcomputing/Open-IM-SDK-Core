@@ -466,9 +466,6 @@ func InOutDoTest(uid, tk, ws, api string) {
 	var organizationListener testOrganizationListener
 	open_im_sdk.SetOrganizationListener(organizationListener)
 
-	var workMomentsListener testWorkMomentsListener
-	open_im_sdk.SetWorkMomentsListener(workMomentsListener)
-
 	InOutlllogin(uid, tk)
 
 	log.Warn("", "InOutDoTest fin")
@@ -499,8 +496,6 @@ func SetListenerAndLogin(uid, tk string) {
 	//var organizationListener testOrganizationListener
 	//open_im_sdk.SetOrganizationListener(organizationListener)
 	//
-	//var workMomentsListener testWorkMomentsListener
-	//open_im_sdk.SetWorkMomentsListener(workMomentsListener)
 
 	InOutlllogin(uid, tk)
 

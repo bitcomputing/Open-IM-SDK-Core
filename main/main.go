@@ -49,7 +49,6 @@ func main() {
 	//test.DoTestSetBurnDuration("single_2861383134")
 	//test.DoTestInvite("123123")
 	// test.DoTestSetAppBackgroundStatus(true)
-	test.TestGetWorkMomentsNotification()
 	for {
 		//test.DotestDeleteFriend()
 		//test.DoTestSendMsg2("", "1443506268")

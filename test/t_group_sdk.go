@@ -84,13 +84,6 @@ func (testOrganizationListener) OnOrganizationUpdated() {
 	log.Info(utils.OperationIDGenerator(), utils.GetSelfFuncName(), "on listener callback ")
 }
 
-type testWorkMomentsListener struct {
-}
-
-func (testWorkMomentsListener) OnRecvNewNotification() {
-	log.NewInfo(utils.OperationIDGenerator(), utils.GetSelfFuncName(), "on listener callback ")
-}
-
 type testCreateGroup struct {
 	OperationID string
 }

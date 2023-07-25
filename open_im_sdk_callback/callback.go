@@ -69,10 +69,6 @@ type OnUserListener interface {
 	OnSelfInfoUpdated(userInfo string)
 }
 
-type OnWorkMomentsListener interface {
-	OnRecvNewNotification()
-}
-
 type OnCustomBusinessListener interface {
 	OnRecvCustomBusinessMessage(businessMessage string)
 }

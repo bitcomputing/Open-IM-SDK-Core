@@ -1,7 +1,6 @@
 package db_interface
 
 import (
-	"open_im_sdk/pkg/db"
 	"open_im_sdk/pkg/db/model_struct"
 	"open_im_sdk/pkg/server_api_params"
 	"open_im_sdk/sdk_struct"
@@ -216,14 +215,6 @@ type DataBase interface {
 	SuperGroupGetMsgSeqListByPeerUserID(userID string) ([]uint32, error)
 	SuperGroupGetMsgSeqListBySelfUserID(userID string) ([]uint32, error)
 	SuperGroupGetAlreadyExistSeqList(groupID string, lostSeqList []uint32) (seqList []uint32, err error)
-	InsertWorkMomentsNotification(jsonDetail, clientMsgID string) error
-	GetWorkMomentsNotification(offset, count int) (WorkMomentsNotifications []*db.LocalWorkMomentsNotification, err error)
-	GetWorkMomentsNotificationLimit(pageNumber, showNumber int) (WorkMomentsNotifications []*db.LocalWorkMomentsNotification, err error)
-	InitWorkMomentsNotificationUnreadCount() error
-	IncrWorkMomentsNotificationUnreadCount() error
-	MarkAllWorkMomentsNotificationAsRead() (err error)
-	GetWorkMomentsUnReadCount() (workMomentsNotificationUnReadCount db.LocalWorkMomentsNotificationUnreadCount, err error)
-	ClearWorkMomentsNotification() (err error)
 	Close() error
 	SetChatLogFailedStatus()
 	InitDB(userID string, dataDir string) error
