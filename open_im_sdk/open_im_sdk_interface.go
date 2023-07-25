@@ -465,16 +465,6 @@ func SearchGroupMembers(callback open_im_sdk_callback.Base, operationID string, 
 	userForSDK.Group().SearchGroupMembers(callback, searchParam, operationID)
 }
 
-////////////////////////////friend/////////////////////////////////////
-
-func SetFriendListener(listener open_im_sdk_callback.OnFriendshipListener) {
-	if listener == nil || userForSDK == nil {
-		log.Error("callback or userForSDK is nil")
-		return
-	}
-	userForSDK.SetFriendListener(listener)
-}
-
 ///////////////////////conversation////////////////////////////////////
 
 func GetAllConversationList(callback open_im_sdk_callback.Base, operationID string) {
@@ -658,7 +648,6 @@ func SetUserListener(listener open_im_sdk_callback.OnUserListener) {
 	}
 	userForSDK.SetUserListener(listener)
 }
-
 
 func SetCustomBusinessListener(listener open_im_sdk_callback.OnCustomBusinessListener) {
 	if listener == nil || userForSDK == nil {

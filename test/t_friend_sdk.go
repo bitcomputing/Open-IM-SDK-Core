@@ -318,9 +318,6 @@ func InOutDoTest(uid, tk, ws, api string) {
 	var batchMsg BatchMsg
 	open_im_sdk.SetBatchMsgListener(&batchMsg)
 
-	var friendListener testFriendListener
-	open_im_sdk.SetFriendListener(friendListener)
-
 	var groupListener testGroupListener
 	open_im_sdk.SetGroupListener(groupListener)
 
@@ -411,9 +408,6 @@ func ReliabilityInitAndLogin(index int, uid, tk, ws, api string) {
 	var msgCallBack MsgListenerCallBak
 	lg.SetAdvancedMsgListener(&msgCallBack)
 
-	var friendListener testFriendListener
-	lg.SetFriendListener(friendListener)
-
 	var groupListener testGroupListener
 	lg.SetGroupListener(groupListener)
 
@@ -463,9 +457,6 @@ func PressInitAndLogin(index int, uid, tk, ws, api string) {
 	var msgCallBack MsgListenerCallBak
 	lg.SetAdvancedMsgListener(&msgCallBack)
 
-	var friendListener testFriendListener
-	lg.SetFriendListener(friendListener)
-
 	var groupListener testGroupListener
 	lg.SetGroupListener(groupListener)
 
@@ -513,9 +504,6 @@ func DoTest(uid, tk, ws, api string) {
 
 	//var msgCallBack MsgListenerCallBak
 	//open_im_sdk.AddAdvancedMsgListener(msgCallBack)
-
-	var friendListener testFriendListener
-	open_im_sdk.SetFriendListener(friendListener)
 
 	var groupListener testGroupListener
 	open_im_sdk.SetGroupListener(groupListener)
@@ -667,50 +655,4 @@ func (testLogin) OnSuccess(string) {
 
 func (testLogin) OnError(code int32, msg string) {
 	fmt.Println("testLogin, OnError", code, msg)
-}
-
-type testFriendListener struct {
-	x int
-}
-
-func (testFriendListener) OnFriendApplicationAdded(callbackInfo string) {
-	log.Info(utils.OperationIDGenerator(), utils.GetSelfFuncName(), callbackInfo)
-}
-func (testFriendListener) OnFriendApplicationDeleted(callbackInfo string) {
-	log.Info(utils.OperationIDGenerator(), utils.GetSelfFuncName(), callbackInfo)
-}
-
-func (testFriendListener) OnFriendApplicationAccepted(callbackInfo string) {
-	log.Info(utils.OperationIDGenerator(), utils.GetSelfFuncName(), callbackInfo)
-}
-
-func (testFriendListener) OnFriendApplicationRejected(callbackInfo string) {
-	log.Info(utils.OperationIDGenerator(), utils.GetSelfFuncName(), callbackInfo)
-}
-
-func (testFriendListener) OnFriendAdded(callbackInfo string) {
-	log.Info(utils.OperationIDGenerator(), utils.GetSelfFuncName(), callbackInfo)
-}
-
-func (testFriendListener) OnFriendDeleted(callbackInfo string) {
-	log.Info(utils.OperationIDGenerator(), utils.GetSelfFuncName(), callbackInfo)
-}
-
-func (testFriendListener) OnBlackAdded(callbackInfo string) {
-	log.Info(utils.OperationIDGenerator(), utils.GetSelfFuncName(), callbackInfo)
-}
-func (testFriendListener) OnBlackDeleted(callbackInfo string) {
-	log.Info(utils.OperationIDGenerator(), utils.GetSelfFuncName(), callbackInfo)
-}
-
-func (testFriendListener) OnFriendInfoChanged(callbackInfo string) {
-	log.Info(utils.OperationIDGenerator(), utils.GetSelfFuncName(), callbackInfo)
-}
-
-func (testFriendListener) OnSuccess() {
-	log.Info(utils.OperationIDGenerator(), utils.GetSelfFuncName())
-}
-
-func (testFriendListener) OnError(code int32, msg string) {
-	log.Info(utils.OperationIDGenerator(), utils.GetSelfFuncName(), code, msg)
 }

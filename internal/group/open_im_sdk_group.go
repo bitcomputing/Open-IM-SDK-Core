@@ -133,6 +133,7 @@ func (g *Group) GetJoinedGroupList(callback open_im_sdk_callback.Base, operation
 	}()
 }
 
+// 已经使用在opencord啦，别删
 func (g *Group) GetGroupsInfo(callback open_im_sdk_callback.Base, groupIDList string, operationID string) {
 	if callback == nil {
 		return
@@ -255,7 +256,7 @@ func (g *Group) GetGroupMemberOwnerAndAdmin(callback open_im_sdk_callback.Base, 
 	}()
 }
 
-//getGroupMemberListByJoinTimeFilter
+// getGroupMemberListByJoinTimeFilter
 func (g *Group) GetGroupMemberListByJoinTimeFilter(callback open_im_sdk_callback.Base, groupID string, offset, count int32, joinTimeBegin, joinTimeEnd int64, filterUserID, operationID string) {
 	if callback == nil {
 		return

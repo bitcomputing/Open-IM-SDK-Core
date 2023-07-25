@@ -33,7 +33,7 @@ type LoginMgr struct {
 	conversation *conv.Conversation
 	user         *user.User
 	//advancedFunction advanced_interface.AdvancedFunction
-	business    *business.Business
+	business *business.Business
 
 	full         *full.Full
 	db           db_interface.DataBase
@@ -51,7 +51,6 @@ type LoginMgr struct {
 	justOnceFlag bool
 
 	groupListener        open_im_sdk_callback.OnGroupListener
-	friendListener       open_im_sdk_callback.OnFriendshipListener
 	conversationListener open_im_sdk_callback.OnConversationListener
 	advancedMsgListener  open_im_sdk_callback.OnAdvancedMsgListener
 	batchMsgListener     open_im_sdk_callback.OnBatchMsgListener
@@ -131,13 +130,6 @@ func (u *LoginMgr) SetBatchMsgListener(batchMsgListener open_im_sdk_callback.OnB
 		u.conversation.SetBatchMsgListener(batchMsgListener)
 	} else {
 		u.batchMsgListener = batchMsgListener
-	}
-}
-func (u *LoginMgr) SetFriendListener(friendListener open_im_sdk_callback.OnFriendshipListener) {
-	if u.friend != nil {
-		u.friend.SetFriendListener(friendListener)
-	} else {
-		u.friendListener = friendListener
 	}
 }
 
@@ -244,7 +236,6 @@ func (u *LoginMgr) login(userID, token string, cb open_im_sdk_callback.Base, ope
 	u.user.SetListener(u.userListener)
 
 	u.friend = friend.NewFriend(u.loginUserID, u.db, u.user, p, u.conversationCh)
-	u.friend.SetFriendListener(u.friendListener)
 
 	u.group = group.NewGroup(u.loginUserID, u.db, p, u.joinedSuperGroupCh, u.heartbeatCmdCh, u.conversationCh)
 	u.group.SetGroupListener(u.groupListener)
@@ -288,7 +279,7 @@ func (u *LoginMgr) login(userID, token string, cb open_im_sdk_callback.Base, ope
 	u.conversation = conv.NewConversation(u.ws, u.db, u.postApi, u.conversationCh,
 		u.loginUserID, u.imConfig.Platform, u.imConfig.DataDir, u.imConfig.EncryptionKey,
 		u.friend, u.group, u.user, objStorage, u.conversationListener, u.advancedMsgListener,
-	 	u.business, u.cache, u.full, u.id2MinSeq, u.imConfig.IsExternalExtensions)
+		u.business, u.cache, u.full, u.id2MinSeq, u.imConfig.IsExternalExtensions)
 	if u.batchMsgListener != nil {
 		u.conversation.SetBatchMsgListener(u.batchMsgListener)
 		log.Info(operationID, "SetBatchMsgListener ", u.batchMsgListener)

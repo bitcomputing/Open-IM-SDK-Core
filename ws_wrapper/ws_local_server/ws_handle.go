@@ -126,8 +126,7 @@ func GenUserRouterNoLock(uid string, batchMsg int, operationID string) *RefRoute
 		wsRouter1.SetBatchMsgListener()
 	}
 	wsRouter1.SetConversationListener()
-	log.Info(operationID, "SetFriendListener() ", uid)
-	wsRouter1.SetFriendListener()
+
 	log.Info(operationID, "SetGroupListener() ", uid)
 	wsRouter1.SetGroupListener()
 	log.Info(operationID, "SetUserListener() ", uid)

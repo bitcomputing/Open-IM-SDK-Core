@@ -29,17 +29,7 @@ type OnGroupListener interface {
 	OnGroupApplicationAccepted(groupApplication string)
 	OnGroupApplicationRejected(groupApplication string)
 }
-type OnFriendshipListener interface {
-	OnFriendApplicationAdded(friendApplication string)
-	OnFriendApplicationDeleted(friendApplication string)
-	OnFriendApplicationAccepted(groupApplication string)
-	OnFriendApplicationRejected(friendApplication string)
-	OnFriendAdded(friendInfo string)
-	OnFriendDeleted(friendInfo string)
-	OnFriendInfoChanged(friendInfo string)
-	OnBlackAdded(blackInfo string)
-	OnBlackDeleted(blackInfo string)
-}
+
 type OnConversationListener interface {
 	OnSyncServerStart()
 	OnSyncServerFinish()

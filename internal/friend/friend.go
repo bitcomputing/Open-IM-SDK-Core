@@ -27,7 +27,6 @@ import (
 )
 
 type Friend struct {
-	friendListener open_im_sdk_callback.OnFriendshipListener
 	loginUserID    string
 	db             db_interface.DataBase
 	user           *user.User
@@ -44,10 +43,6 @@ func (f *Friend) Db() db_interface.DataBase {
 
 func NewFriend(loginUserID string, db db_interface.DataBase, user *user.User, p *ws.PostApi, conversationCh chan common.Cmd2Value) *Friend {
 	return &Friend{loginUserID: loginUserID, db: db, user: user, p: p, conversationCh: conversationCh}
-}
-
-func (f *Friend) SetListener(listener open_im_sdk_callback.OnFriendshipListener) {
-	f.friendListener = listener
 }
 
 func (f *Friend) SetListenerForService(listener open_im_sdk_callback.OnListenerForService) {
