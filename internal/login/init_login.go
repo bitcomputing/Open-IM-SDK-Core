@@ -268,10 +268,6 @@ func (u *LoginMgr) login(userID, token string, cb open_im_sdk_callback.Base, ope
 		objStorage = comm2.NewCOS(u.postApi)
 	case "minio":
 		objStorage = comm2.NewMinio(u.postApi)
-	case "oss":
-		objStorage = comm2.NewOSS(u.postApi)
-	case "aws":
-		objStorage = comm2.NewAWS(u.postApi)
 	default:
 		objStorage = comm2.NewCOS(u.postApi)
 	}
@@ -467,8 +463,6 @@ func (u *LoginMgr) uploadImage(callback open_im_sdk_callback.Base, filePath stri
 		o = comm2.NewCOS(p)
 	case "minio":
 		o = comm2.NewMinio(p)
-	case "aws":
-		o = comm2.NewAWS(p)
 	default:
 		o = comm2.NewCOS(p)
 	}

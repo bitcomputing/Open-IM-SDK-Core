@@ -3,13 +3,7 @@ module open_im_sdk
 go 1.15
 
 require (
-	github.com/aliyun/aliyun-oss-go-sdk v2.2.1+incompatible
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
-	github.com/aws/aws-sdk-go-v2 v1.16.7
-	github.com/aws/aws-sdk-go-v2/config v1.15.14
-	github.com/aws/aws-sdk-go-v2/credentials v1.12.9
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.27.1
-	github.com/baiyubin/aliyun-sts-go-sdk v0.0.0-20180326062324-cfa1a18b161f // indirect
 	github.com/go-playground/validator/v10 v10.10.0
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.8
