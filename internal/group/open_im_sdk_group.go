@@ -3,10 +3,8 @@ package group
 import (
 	"open_im_sdk/open_im_sdk_callback"
 	"open_im_sdk/pkg/common"
-	"open_im_sdk/pkg/constant"
 	"open_im_sdk/pkg/log"
 	"open_im_sdk/pkg/sdk_params_callback"
-	api "open_im_sdk/pkg/server_api_params"
 	"open_im_sdk/pkg/utils"
 )
 
@@ -34,105 +32,6 @@ func (g *Group) CreateGroup(callback open_im_sdk_callback.Base, groupBaseInfo st
 	}()
 }
 
-func (g *Group) JoinGroup(callback open_im_sdk_callback.Base, groupID, reqMsg string, joinSource int32, operationID string) {
-	if callback == nil {
-		return
-	}
-	fName := utils.GetSelfFuncName()
-	go func() {
-		log.NewInfo(operationID, fName, "args: ", groupID, reqMsg, joinSource)
-		g.joinGroup(groupID, reqMsg, joinSource, callback, operationID)
-		callback.OnSuccess(utils.StructToJsonString(sdk_params_callback.JoinGroupCallback))
-		log.NewInfo(operationID, fName, "callback: ", utils.StructToJsonString(sdk_params_callback.JoinGroupCallback))
-	}()
-}
-
-func (g *Group) QuitGroup(callback open_im_sdk_callback.Base, groupID string, operationID string) {
-	if callback == nil {
-		return
-	}
-	fName := utils.GetSelfFuncName()
-	go func() {
-		log.NewInfo(operationID, fName, "args: ", groupID)
-		g.quitGroup(groupID, callback, operationID)
-		callback.OnSuccess(utils.StructToJsonString(sdk_params_callback.QuitGroupCallback))
-		log.NewInfo(operationID, fName, " callback: ", utils.StructToJsonString(sdk_params_callback.QuitGroupCallback))
-	}()
-}
-
-func (g *Group) DismissGroup(callback open_im_sdk_callback.Base, groupID string, operationID string) {
-	if callback == nil {
-		return
-	}
-	fName := utils.GetSelfFuncName()
-	go func() {
-		log.NewInfo(operationID, fName, "args: ", groupID)
-		g.dismissGroup(groupID, callback, operationID)
-		callback.OnSuccess(utils.StructToJsonString(sdk_params_callback.DismissGroupCallback))
-		log.NewInfo(operationID, fName, " callback: ", utils.StructToJsonString(sdk_params_callback.DismissGroupCallback))
-	}()
-}
-
-func (g *Group) ChangeGroupMute(callback open_im_sdk_callback.Base, groupID string, isMute bool, operationID string) {
-	if callback == nil {
-		return
-	}
-	fName := utils.GetSelfFuncName()
-	go func() {
-		log.NewInfo(operationID, fName, "args: ", groupID, isMute)
-		g.changeGroupMute(groupID, isMute, callback, operationID)
-		callback.OnSuccess(utils.StructToJsonString(sdk_params_callback.GroupMuteChangeCallback))
-		log.NewInfo(operationID, fName, " callback: ", utils.StructToJsonString(sdk_params_callback.GroupMuteChangeCallback))
-	}()
-}
-
-func (g *Group) ChangeGroupMemberMute(callback open_im_sdk_callback.Base, groupID, userID string, mutedSeconds uint32, operationID string) {
-	if callback == nil {
-		return
-	}
-	fName := utils.GetSelfFuncName()
-	go func() {
-		log.NewInfo(operationID, fName, "args: ", groupID, userID, mutedSeconds)
-		g.changeGroupMemberMute(groupID, userID, mutedSeconds, callback, operationID)
-		callback.OnSuccess(utils.StructToJsonString(sdk_params_callback.GroupMemberMuteChangeCallback))
-		log.NewInfo(operationID, fName, " callback: ", utils.StructToJsonString(sdk_params_callback.GroupMemberMuteChangeCallback))
-	}()
-}
-
-func (g *Group) SetGroupMemberRoleLevel(callback open_im_sdk_callback.Base, groupID, userID string, roleLevel int, operationID string) {
-	if callback == nil {
-		return
-	}
-	fName := utils.GetSelfFuncName()
-	go func() {
-		log.NewInfo(operationID, fName, "args: ", groupID, userID, roleLevel)
-		g.setGroupMemberRoleLevel(callback, groupID, userID, roleLevel, operationID)
-		callback.OnSuccess(constant.SuccessCallbackDefault)
-		log.NewInfo(operationID, fName, " callback: ", constant.SuccessCallbackDefault)
-	}()
-}
-
-func (g *Group) SetGroupMemberInfo(callback open_im_sdk_callback.Base, groupMemberInfo string, operationID string) {
-	var unmarshalSetGroupMemberInfoParam sdk_params_callback.SetGroupMemberInfoParam
-	common.JsonUnmarshalAndArgsValidate(groupMemberInfo, &unmarshalSetGroupMemberInfoParam, callback, operationID)
-	g.setGroupMemberInfo(callback, unmarshalSetGroupMemberInfoParam, operationID)
-	callback.OnSuccess(utils.StructToJsonStringDefault(sdk_params_callback.SetGroupMemberInfoCallback))
-}
-
-func (g *Group) GetJoinedGroupList(callback open_im_sdk_callback.Base, operationID string) {
-	if callback == nil {
-		return
-	}
-	fName := utils.GetSelfFuncName()
-	go func() {
-		log.NewInfo(operationID, fName, "args: ")
-		groupList := g.getJoinedGroupList(callback, operationID)
-		log.Debug(operationID, "this is a dbd test", groupList)
-		callback.OnSuccess(utils.StructToJsonStringDefault(groupList))
-		log.NewInfo(operationID, fName, " callback: ", utils.StructToJsonStringDefault(groupList))
-	}()
-}
-
 // 已经使用在opencord啦，别删
 func (g *Group) GetGroupsInfo(callback open_im_sdk_callback.Base, groupIDList string, operationID string) {
 	if callback == nil {
@@ -147,112 +46,6 @@ func (g *Group) GetGroupsInfo(callback open_im_sdk_callback.Base, groupIDList st
 		callback.OnSuccess(utils.StructToJsonStringDefault(groupsInfoList))
 		log.NewInfo(operationID, fName, " callback: ", utils.StructToJsonStringDefault(groupsInfoList))
 
-	}()
-}
-
-func (g *Group) SearchGroups(callback open_im_sdk_callback.Base, searchParam, operationID string) {
-	if callback == nil {
-		return
-	}
-	fName := utils.GetSelfFuncName()
-	go func() {
-		log.NewInfo(operationID, fName, "args: ", searchParam)
-		var unmarshalGetGroupsInfoParam sdk_params_callback.SearchGroupsParam
-		common.JsonUnmarshalAndArgsValidate(searchParam, &unmarshalGetGroupsInfoParam, callback, operationID)
-		unmarshalGetGroupsInfoParam.KeywordList = utils.TrimStringList(unmarshalGetGroupsInfoParam.KeywordList)
-		groupsInfoList := g.searchGroups(callback, unmarshalGetGroupsInfoParam, operationID)
-		callback.OnSuccess(utils.StructToJsonStringDefault(groupsInfoList))
-		log.NewInfo(operationID, fName, " callback: ", utils.StructToJsonStringDefault(groupsInfoList), len(groupsInfoList))
-
-	}()
-}
-func (g *Group) SetGroupInfo(callback open_im_sdk_callback.Base, groupInfo string, groupID string, operationID string) {
-	if callback == nil {
-		return
-	}
-	fName := utils.GetSelfFuncName()
-	go func() {
-		log.NewInfo(operationID, fName, "args: ", groupInfo, groupID)
-		var unmarshalSetGroupInfoParam sdk_params_callback.SetGroupInfoParam
-		common.JsonUnmarshalAndArgsValidate(groupInfo, &unmarshalSetGroupInfoParam, callback, operationID)
-		g.setGroupInfo(callback, unmarshalSetGroupInfoParam, groupID, operationID)
-		callback.OnSuccess(utils.StructToJsonString(sdk_params_callback.SetGroupInfoCallback))
-		log.NewInfo(operationID, fName, " callback: ", utils.StructToJsonString(sdk_params_callback.SetGroupInfoCallback))
-	}()
-}
-
-//func SetGroupVerification(callback open_im_sdk_callback.Base, operationID string, groupID string, verification int32)
-
-func (g *Group) SetGroupVerification(callback open_im_sdk_callback.Base, verification int32, groupID string, operationID string) {
-	if callback == nil {
-		return
-	}
-	fName := utils.GetSelfFuncName()
-	go func() {
-		log.NewInfo(operationID, fName, "args: ", verification, groupID)
-		var unmarshalSetGroupInfoParam sdk_params_callback.SetGroupInfoParam
-		n := verification
-		unmarshalSetGroupInfoParam.NeedVerification = &n
-		g.setGroupInfo(callback, unmarshalSetGroupInfoParam, groupID, operationID)
-		callback.OnSuccess(utils.StructToJsonString(sdk_params_callback.SetGroupInfoCallback))
-		log.NewInfo(operationID, fName, " callback: ", utils.StructToJsonString(sdk_params_callback.SetGroupInfoCallback))
-	}()
-}
-func (g *Group) SetGroupLookMemberInfo(callback open_im_sdk_callback.Base, rule int32, groupID string, operationID string) {
-	if callback == nil {
-		return
-	}
-	fName := utils.GetSelfFuncName()
-	go func() {
-		log.NewInfo(operationID, fName, "args: ", rule, groupID)
-		apiReq := api.SetGroupInfoReq{}
-		apiReq.GroupID = groupID
-		apiReq.LookMemberInfo = &rule
-		apiReq.OperationID = operationID
-		g.modifyGroupInfo(callback, apiReq, operationID)
-		callback.OnSuccess(utils.StructToJsonString(sdk_params_callback.SetGroupInfoCallback))
-		log.NewInfo(operationID, fName, " callback: ", utils.StructToJsonString(sdk_params_callback.SetGroupInfoCallback))
-	}()
-}
-func (g *Group) SetGroupApplyMemberFriend(callback open_im_sdk_callback.Base, rule int32, groupID string, operationID string) {
-	if callback == nil {
-		return
-	}
-	fName := utils.GetSelfFuncName()
-	go func() {
-		log.NewInfo(operationID, fName, "args: ", rule, groupID)
-		apiReq := api.SetGroupInfoReq{}
-		apiReq.GroupID = groupID
-		apiReq.ApplyMemberFriend = &rule
-		apiReq.OperationID = operationID
-		g.modifyGroupInfo(callback, apiReq, operationID)
-		callback.OnSuccess(utils.StructToJsonString(sdk_params_callback.SetGroupInfoCallback))
-		log.NewInfo(operationID, fName, " callback: ", utils.StructToJsonString(sdk_params_callback.SetGroupInfoCallback))
-	}()
-}
-
-func (g *Group) GetGroupMemberList(callback open_im_sdk_callback.Base, groupID string, filter, offset, count int32, operationID string) {
-	if callback == nil {
-		return
-	}
-	fName := utils.GetSelfFuncName()
-	go func() {
-		log.NewInfo(operationID, fName, "args: ", groupID, offset, count)
-		groupMemberList := g.getGroupMemberList(callback, groupID, filter, offset, count, operationID)
-		callback.OnSuccess(utils.StructToJsonStringDefault(groupMemberList))
-		log.NewInfo(operationID, fName, " callback: ", utils.StructToJsonStringDefault(groupMemberList))
-	}()
-}
-func (g *Group) GetGroupMemberOwnerAndAdmin(callback open_im_sdk_callback.Base, groupID string, operationID string) {
-	if callback == nil {
-		return
-	}
-	fName := utils.GetSelfFuncName()
-	go func() {
-		log.NewInfo(operationID, fName, "args: ", groupID)
-		groupMemberList := g.getGroupMemberOwnerAndAdmin(callback, groupID, operationID)
-		callback.OnSuccess(utils.StructToJsonStringDefault(groupMemberList))
-		log.NewInfo(operationID, fName, " callback: ", utils.StructToJsonStringDefault(groupMemberList))
 	}()
 }
 
@@ -284,21 +77,6 @@ func (g *Group) GetGroupMembersInfo(callback open_im_sdk_callback.Base, groupID 
 		groupMemberList := g.getGroupMembersInfo(callback, groupID, unmarshalParam, operationID)
 		callback.OnSuccess(utils.StructToJsonStringDefault(groupMemberList))
 		log.NewInfo(operationID, fName, " callback: ", utils.StructToJsonStringDefault(groupMemberList))
-	}()
-}
-
-func (g *Group) KickGroupMember(callback open_im_sdk_callback.Base, groupID string, reason string, userIDList string, operationID string) {
-	if callback == nil {
-		return
-	}
-	fName := utils.GetSelfFuncName()
-	go func() {
-		log.NewInfo(operationID, fName, "args: ", groupID, reason, userIDList)
-		var unmarshalParam sdk_params_callback.KickGroupMemberParam
-		common.JsonUnmarshalCallback(userIDList, &unmarshalParam, callback, operationID)
-		result := g.kickGroupMember(callback, groupID, unmarshalParam, reason, operationID)
-		callback.OnSuccess(utils.StructToJsonStringDefault(result))
-		log.NewInfo(operationID, fName, " callback: ", utils.StructToJsonStringDefault(result))
 	}()
 }
 

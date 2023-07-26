@@ -2,6 +2,7 @@ package group
 
 import (
 	"errors"
+	"github.com/jinzhu/copier"
 	"math/big"
 	comm "open_im_sdk/internal/common"
 	ws "open_im_sdk/internal/interaction"
@@ -17,9 +18,6 @@ import (
 	"open_im_sdk/sdk_struct"
 	"sort"
 	"sync"
-	"time"
-
-	"github.com/jinzhu/copier"
 )
 
 // //utils.GetCurrentTimestampByMill()
@@ -433,16 +431,6 @@ func (g *Group) createGroup(callback open_im_sdk_callback.Base, group sdk.Create
 	return (*sdk.CreateGroupCallback)(&m)
 }
 
-func (g *Group) joinGroup(groupID, reqMsg string, joinSource int32, callback open_im_sdk_callback.Base, operationID string) {
-	apiReq := api.JoinGroupReq{}
-	apiReq.OperationID = operationID
-	apiReq.ReqMessage = reqMsg
-	apiReq.GroupID = groupID
-	apiReq.JoinSource = joinSource
-	g.p.PostFatalCallback(callback, constant.JoinGroupRouter, apiReq, nil, apiReq.OperationID)
-	g.SyncSelfGroupApplication(operationID)
-}
-
 func (g *Group) GetGroupOwnerIDAndAdminIDList(groupID, operationID string) (ownerID string, adminIDList []string, err error) {
 	localGroup, err := g.db.GetGroupInfoByGroupID(groupID)
 	if err != nil {
@@ -453,95 +441,6 @@ func (g *Group) GetGroupOwnerIDAndAdminIDList(groupID, operationID string) (owne
 		return "", nil, err
 	}
 	return localGroup.OwnerUserID, adminIDList, nil
-}
-
-func (g *Group) quitGroup(groupID string, callback open_im_sdk_callback.Base, operationID string) {
-	apiReq := api.QuitGroupReq{}
-	apiReq.OperationID = operationID
-	apiReq.GroupID = groupID
-	g.p.PostFatalCallback(callback, constant.QuitGroupRouter, apiReq, nil, apiReq.OperationID)
-	g.db.DeleteGroupAllMembers(groupID)
-	g.SyncJoinedGroupList(operationID)
-}
-
-func (g *Group) dismissGroup(groupID string, callback open_im_sdk_callback.Base, operationID string) {
-	apiReq := api.DismissGroupReq{}
-	apiReq.OperationID = operationID
-	apiReq.GroupID = groupID
-	g.p.PostFatalCallback(callback, constant.DismissGroupRouter, apiReq, nil, apiReq.OperationID)
-	g.SyncJoinedGroupList(operationID)
-}
-
-func (g *Group) changeGroupMute(groupID string, isMute bool, callback open_im_sdk_callback.Base, operationID string) {
-	if isMute {
-		apiReq := api.MuteGroupReq{}
-		apiReq.OperationID = operationID
-		apiReq.GroupID = groupID
-		g.p.PostFatalCallback(callback, constant.MuteGroupRouter, apiReq, nil, apiReq.OperationID)
-	} else {
-		apiReq := api.CancelMuteGroupReq{}
-		apiReq.OperationID = operationID
-		apiReq.GroupID = groupID
-		g.p.PostFatalCallback(callback, constant.CancelMuteGroupRouter, apiReq, nil, apiReq.OperationID)
-	}
-	g.SyncJoinedGroupList(operationID)
-}
-
-func (g *Group) changeGroupMemberMute(groupID, userID string, mutedSeconds uint32, callback open_im_sdk_callback.Base, operationID string) {
-	if mutedSeconds == 0 {
-		apiReq := api.CancelMuteGroupMemberReq{}
-		apiReq.OperationID = operationID
-		apiReq.GroupID = groupID
-		apiReq.UserID = userID
-		g.p.PostFatalCallback(callback, constant.CancelMuteGroupMemberRouter, apiReq, nil, apiReq.OperationID)
-	} else {
-		apiReq := api.MuteGroupMemberReq{}
-		apiReq.OperationID = operationID
-		apiReq.GroupID = groupID
-		apiReq.UserID = userID
-		apiReq.MutedSeconds = mutedSeconds
-		g.p.PostFatalCallback(callback, constant.MuteGroupMemberRouter, apiReq, nil, apiReq.OperationID)
-	}
-	g.updateLocalMemberImmediately(groupID, userID, map[string]interface{}{"mute_end_time": uint32(int64(time.Now().Second()) + int64(mutedSeconds))}, operationID)
-	g.syncGroupMemberByGroupID(groupID, operationID, true)
-}
-
-// func (g *Group) updateGroup(groupID, userID string, updateField map[string]interface{}, operationID string) {
-//
-//		g.updateLocalMemberImmediately(member, operationID)
-//	}
-func (g *Group) setGroupMemberRoleLevel(callback open_im_sdk_callback.Base, groupID, userID string, roleLevel int, operationID string) {
-	apiReq := api.SetGroupMemberRoleLevelReq{
-		SetGroupMemberBaseInfoReq: api.SetGroupMemberBaseInfoReq{
-			OperationID: operationID,
-			UserID:      userID,
-			GroupID:     groupID,
-		},
-		RoleLevel: roleLevel,
-	}
-	g.p.PostFatalCallback(callback, constant.SetGroupMemberInfoRouter, apiReq, nil, apiReq.OperationID)
-	g.updateLocalMemberImmediately(groupID, userID, map[string]interface{}{"role_level": int32(roleLevel)}, operationID)
-	g.syncGroupMemberByGroupID(groupID, operationID, true)
-}
-
-func (g *Group) setGroupMemberInfo(callback open_im_sdk_callback.Base, param sdk.SetGroupMemberInfoParam, operationID string) {
-	apiReq := api.SetGroupMemberInfoReq{OperationID: operationID, Ex: param.Ex, UserID: param.UserID, GroupID: param.GroupID}
-	g.p.PostFatalCallback(callback, constant.SetGroupMemberInfoRouter, apiReq, nil, apiReq.OperationID)
-	if param.Ex != nil {
-		g.updateLocalMemberImmediately(param.GroupID, param.UserID, map[string]interface{}{"ex": *param.Ex}, operationID)
-	} else {
-		g.updateLocalMemberImmediately(param.GroupID, param.UserID, map[string]interface{}{"ex": ""}, operationID)
-	}
-	g.syncGroupMemberByGroupID(param.GroupID, operationID, true)
-}
-
-func (g *Group) getJoinedGroupList(callback open_im_sdk_callback.Base, operationID string) sdk.GetJoinedGroupListCallback {
-	groupList, err := g.db.GetJoinedGroupListDB()
-	log.Info(operationID, utils.GetSelfFuncName(), " args ", groupList)
-	common.CheckDBErrCallback(callback, err, operationID)
-	superGroupList, _ := g.db.GetJoinedSuperGroupList()
-	groupList = append(groupList, superGroupList...)
-	return groupList
 }
 
 func (g *Group) GetGroupInfoFromLocal2Svr(groupID string) (*model_struct.LocalGroup, error) {
@@ -562,15 +461,6 @@ func (g *Group) GetGroupInfoFromLocal2Svr(groupID string) (*model_struct.LocalGr
 	} else {
 		return nil, utils.Wrap(errors.New("server not this group"), "")
 	}
-}
-
-func (g *Group) searchGroups(callback open_im_sdk_callback.Base, param sdk.SearchGroupsParam, operationID string) sdk.SearchGroupsCallback {
-	if len(param.KeywordList) == 0 || (!param.IsSearchGroupName && !param.IsSearchGroupID) {
-		common.CheckAnyErrCallback(callback, 201, errors.New("keyword is null or search field all false"), operationID)
-	}
-	localGroup, err := g.db.GetAllGroupInfoByGroupIDOrGroupName(param.KeywordList[0], param.IsSearchGroupID, param.IsSearchGroupName)
-	common.CheckDBErrCallback(callback, err, operationID)
-	return localGroup
 }
 
 func (g *Group) getGroupsInfo(groupIDList sdk.GetGroupsInfoParam, callback open_im_sdk_callback.Base, operationID string) sdk.GetGroupsInfoCallback {
@@ -644,40 +534,6 @@ func (g *Group) getGroupAbstractInfoFromSvr(groupID string, operationID string) 
 	return &groupAbstractInfoResp, nil
 }
 
-func (g *Group) setGroupInfo(callback open_im_sdk_callback.Base, groupInfo sdk.SetGroupInfoParam, groupID, operationID string) {
-	apiReq := api.SetGroupInfoReq{}
-	apiReq.GroupName = groupInfo.GroupName
-	apiReq.FaceURL = groupInfo.FaceURL
-	apiReq.Notification = groupInfo.Notification
-	apiReq.Introduction = groupInfo.Introduction
-	apiReq.Ex = groupInfo.Ex
-	apiReq.OperationID = operationID
-	apiReq.GroupID = groupID
-	apiReq.NeedVerification = groupInfo.NeedVerification
-	log.NewInfo(operationID, utils.GetSelfFuncName(), "args: ", groupInfo, groupID)
-	g.p.PostFatalCallback(callback, constant.SetGroupInfoRouter, apiReq, nil, apiReq.OperationID)
-	g.SyncJoinedGroupList(operationID)
-}
-
-func (g *Group) modifyGroupInfo(callback open_im_sdk_callback.Base, apiReq api.SetGroupInfoReq, operationID string) {
-	log.NewInfo(operationID, utils.GetSelfFuncName(), "args: ", apiReq)
-	g.p.PostFatalCallback(callback, constant.SetGroupInfoRouter, apiReq, nil, apiReq.OperationID)
-	g.SyncJoinedGroupList(operationID)
-}
-
-// todo
-func (g *Group) getGroupMemberList(callback open_im_sdk_callback.Base, groupID string, filter, offset, count int32, operationID string) sdk.GetGroupMemberListCallback {
-	groupInfoList, err := g.db.GetGroupMemberListSplit(groupID, filter, int(offset), int(count))
-	common.CheckDBErrCallback(callback, err, operationID)
-	return groupInfoList
-}
-
-func (g *Group) getGroupMemberOwnerAndAdmin(callback open_im_sdk_callback.Base, groupID string, operationID string) sdk.GetGroupMemberListCallback {
-	groupInfoList, err := g.db.GetGroupMemberOwnerAndAdmin(groupID)
-	common.CheckDBErrCallback(callback, err, operationID)
-	return groupInfoList
-}
-
 func (g *Group) getGroupMemberListByJoinTimeFilter(callback open_im_sdk_callback.Base, groupID string, offset, count int32, joinTimeBegin, joinTimeEnd int64, userIDList []string, operationID string) sdk.GetGroupMemberListCallback {
 	if joinTimeEnd == 0 {
 		joinTimeEnd = utils.GetCurrentTimestampBySecond()
@@ -692,22 +548,6 @@ func (g *Group) getGroupMembersInfo(callback open_im_sdk_callback.Base, groupID 
 	groupInfoList, err := g.db.GetGroupSomeMemberInfo(groupID, userIDList)
 	common.CheckDBErrCallback(callback, err, operationID)
 	return groupInfoList
-}
-
-func (g *Group) kickGroupMember(callback open_im_sdk_callback.Base, groupID string, memberList sdk.KickGroupMemberParam, reason string, operationID string) sdk.KickGroupMemberCallback {
-	apiReq := api.KickGroupMemberReq{}
-	apiReq.GroupID = groupID
-	apiReq.KickedUserIDList = memberList
-	apiReq.Reason = reason
-	apiReq.OperationID = operationID
-	realData := api.KickGroupMemberResp{}
-	g.p.PostFatalCallback(callback, constant.KickGroupMemberRouter, apiReq, &realData.UserIDResultList, apiReq.OperationID)
-	//	g.SyncJoinedGroupList(operationID)
-	for _, v := range memberList {
-		g.deleteMemberImmediately(groupID, v, operationID)
-	}
-	g.syncGroupMemberByGroupID(groupID, operationID, true)
-	return realData.UserIDResultList
 }
 
 func (g *Group) transferGroupOwner(callback open_im_sdk_callback.Base, groupID, newOwnerUserID string, operationID string) {

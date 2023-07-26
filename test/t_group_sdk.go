@@ -2,7 +2,6 @@ package test
 
 import (
 	"open_im_sdk/open_im_sdk"
-	"open_im_sdk/pkg/constant"
 	"open_im_sdk/pkg/sdk_params_callback"
 	"open_im_sdk/pkg/server_api_params"
 
@@ -138,40 +137,6 @@ func (t testSetGroupInfo) OnError(errCode int32, errMsg string) {
 	log.Info(t.OperationID, utils.GetSelfFuncName(), errCode, errMsg)
 }
 
-func DoSetGroupInfo() {
-	var test testSetGroupInfo
-	test.OperationID = utils.OperationIDGenerator()
-	var input sdk_params_callback.SetGroupInfoParam
-	input.GroupName = "new group name 11111111"
-	input.Notification = "new notification 11111"
-	var n int32
-	n = 1
-	input.NeedVerification = &n
-	setInfo := utils.StructToJsonString(input)
-	open_im_sdk.SetGroupInfo(test, test.OperationID, TestgroupID, setInfo)
-	log.Info(test.OperationID, utils.GetSelfFuncName(), "input: ", setInfo)
-
-}
-
-func DoSetGroupVerification() {
-	var test testSetGroupInfo
-	test.OperationID = utils.OperationIDGenerator()
-	open_im_sdk.SetGroupVerification(test, test.OperationID, TestgroupID, 1)
-	log.Info(test.OperationID, utils.GetSelfFuncName(), "input: ", TestgroupID, 2)
-}
-func DoSetGroupLookMemberInfo() {
-	var test testSetGroupInfo
-	test.OperationID = utils.OperationIDGenerator()
-	open_im_sdk.SetGroupLookMemberInfo(test, test.OperationID, TestgroupID, 0)
-	log.Info(test.OperationID, utils.GetSelfFuncName(), "input: ", TestgroupID, 1)
-}
-func DoSetGroupApplyMemberFriend() {
-	var test testSetGroupInfo
-	test.OperationID = utils.OperationIDGenerator()
-	open_im_sdk.SetGroupApplyMemberFriend(test, test.OperationID, TestgroupID, 1)
-	log.Info(test.OperationID, utils.GetSelfFuncName(), "input: ", TestgroupID, 1)
-}
-
 type testGetGroupsInfo struct {
 	OperationID string
 }
@@ -203,14 +168,6 @@ func DoTestGetGroupsInfo() {
 	log.Info(test.OperationID, "test getGroupsInfo input", list)
 	open_im_sdk.GetGroupsInfo(test, test.OperationID, list)
 }
-func DoTestSearchGroups() {
-	var test testGetGroupsInfo
-	var params sdk_params_callback.SearchGroupsParam
-	params.KeywordList = []string{"17"}
-	//params.IsSearchGroupID =true
-	params.IsSearchGroupName = true
-	open_im_sdk.SearchGroups(test, test.OperationID, utils.StructToJsonString(params))
-}
 
 type testJoinGroup struct {
 	OperationID string
@@ -224,15 +181,6 @@ func (t testJoinGroup) OnError(errCode int32, errMsg string) {
 	log.Info(t.OperationID, "testJoinGroup,onError", errCode, errMsg)
 }
 
-func DoTestJoinGroup() {
-	var test testJoinGroup
-	test.OperationID = utils.OperationIDGenerator()
-	groupID := "1003105543"
-	reqMsg := "121212"
-	log.Info(test.OperationID, "test join group input", groupID, reqMsg)
-	open_im_sdk.JoinGroup(test, test.OperationID, groupID, reqMsg, constant.JoinBySearch)
-}
-
 type testQuitGroup struct {
 	OperationID string
 }
@@ -243,14 +191,6 @@ func (t testQuitGroup) OnSuccess(data string) {
 
 func (t testQuitGroup) OnError(errCode int32, errMsg string) {
 	log.Info(t.OperationID, "testQuitGroup,onError", errCode, errMsg)
-}
-
-func DoTestQuitGroup() {
-	var test testQuitGroup
-	test.OperationID = utils.OperationIDGenerator()
-	groupID := "19de93b442a1ca3b772aa0f12761939d"
-	log.Info(test.OperationID, "test quit group input", groupID)
-	open_im_sdk.QuitGroup(test, test.OperationID, groupID)
 }
 
 type testGetJoinedGroupList struct {
@@ -269,12 +209,6 @@ func (t testGetJoinedGroupList) OnSuccess(data string) {
 	log.Info(t.OperationID, "testGetJoinedGroupList OnSuccess, output", data)
 }
 
-func DoTestGetJoinedGroupList() {
-	var test testGetJoinedGroupList
-	test.OperationID = utils.OperationIDGenerator()
-	open_im_sdk.GetJoinedGroupList(test, test.OperationID)
-}
-
 type testGetGroupMemberList struct {
 	OperationID string
 }
@@ -286,13 +220,6 @@ func (t testGetGroupMemberList) OnSuccess(data string) {
 
 func (t testGetGroupMemberList) OnError(errCode int32, errMsg string) {
 	log.Info(t.OperationID, utils.GetSelfFuncName(), "testGetGroupMemberList", errCode, errMsg)
-}
-
-func DotestGetGroupMemberList() {
-	var test testGetGroupMemberList
-	test.OperationID = utils.OperationIDGenerator()
-	var groupId = TestgroupID
-	open_im_sdk.GetGroupMemberList(test, test.OperationID, groupId, 4, 0, 100)
 }
 
 func DotestCos() {
@@ -392,15 +319,6 @@ func DotestGetGroupMemberListByJoinTimeFilter() {
 	log.Info(test.OperationID, utils.GetSelfFuncName(), "input ", jlist)
 	open_im_sdk.GetGroupMemberListByJoinTimeFilter(test, test.OperationID, "3750066757", 1, 40, 0, 0, jlist)
 }
-func DotestKickGroupMember() {
-	var test testKickGroupMember
-	test.OperationID = utils.OperationIDGenerator()
-	var memlist []string
-	memlist = append(memlist, MemberUserID)
-	jlist := utils.StructToJsonString(memlist)
-	log.Info(test.OperationID, utils.GetSelfFuncName(), "input ", jlist)
-	open_im_sdk.KickGroupMember(test, test.OperationID, TestgroupID, "kkk", jlist)
-}
 
 type testInviteUserToGroup struct {
 	baseCallback
@@ -488,24 +406,4 @@ func DotestSetGroupMemberNickname(myUserID string) {
 	log.Info(test.OperationID, utils.GetSelfFuncName(), "input: ")
 	open_im_sdk.SetGroupMemberNickname(test, test.OperationID, TestgroupID, myUserID, "")
 
-}
-
-func DoTestSetGroupMemberRoleLevel(groupID, userID string, roleLevel int) {
-	var test testSetGroupMemberNickname
-	test.OperationID = utils.OperationIDGenerator()
-	fmt.Println(test.OperationID, utils.GetSelfFuncName(), "inputx: ")
-	open_im_sdk.SetGroupMemberRoleLevel(test, test.OperationID, groupID, userID, roleLevel)
-}
-
-func DoTestSetGroupMemberInfo(groupID, userID string, ex string) {
-	var test testSetGroupMemberNickname
-	test.OperationID = utils.OperationIDGenerator()
-	param := sdk_params_callback.SetGroupMemberInfoParam{GroupID: groupID, UserID: userID}
-	if ex != "" {
-		param.Ex = &ex
-	}
-	g1 := utils.StructToJsonString(param)
-	fmt.Println(test.OperationID, utils.GetSelfFuncName(), "inputx: ", g1)
-
-	open_im_sdk.SetGroupMemberInfo(test, test.OperationID, g1)
 }
