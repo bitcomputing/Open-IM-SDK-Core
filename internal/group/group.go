@@ -534,62 +534,6 @@ func (g *Group) getGroupAbstractInfoFromSvr(groupID string, operationID string) 
 	return &groupAbstractInfoResp, nil
 }
 
-func (g *Group) getGroupMemberListByJoinTimeFilter(callback open_im_sdk_callback.Base, groupID string, offset, count int32, joinTimeBegin, joinTimeEnd int64, userIDList []string, operationID string) sdk.GetGroupMemberListCallback {
-	if joinTimeEnd == 0 {
-		joinTimeEnd = utils.GetCurrentTimestampBySecond()
-	}
-	groupInfoList, err := g.db.GetGroupMemberListSplitByJoinTimeFilter(groupID, int(offset), int(count), joinTimeBegin, joinTimeEnd, userIDList)
-	common.CheckDBErrCallback(callback, err, operationID)
-	return groupInfoList
-}
-
-// todo
-func (g *Group) getGroupMembersInfo(callback open_im_sdk_callback.Base, groupID string, userIDList sdk.GetGroupMembersInfoParam, operationID string) sdk.GetGroupMembersInfoCallback {
-	groupInfoList, err := g.db.GetGroupSomeMemberInfo(groupID, userIDList)
-	common.CheckDBErrCallback(callback, err, operationID)
-	return groupInfoList
-}
-
-func (g *Group) transferGroupOwner(callback open_im_sdk_callback.Base, groupID, newOwnerUserID string, operationID string) {
-	apiReq := api.TransferGroupOwnerReq{}
-	apiReq.GroupID = groupID
-	apiReq.NewOwnerUserID = newOwnerUserID
-	apiReq.OperationID = operationID
-	apiReq.OldOwnerUserID = g.loginUserID
-	g.p.PostFatalCallback(callback, constant.TransferGroupRouter, apiReq, nil, apiReq.OperationID)
-
-	g.updateLocalMemberImmediately(groupID, g.loginUserID, map[string]interface{}{"role_level": constant.GroupOrdinaryUsers}, operationID)
-	g.updateLocalMemberImmediately(groupID, newOwnerUserID, map[string]interface{}{"role_level": constant.GroupOwner}, operationID)
-	g.SyncJoinedGroupList(operationID)
-	g.syncGroupMemberByGroupID(groupID, operationID, true)
-}
-
-func (g *Group) inviteUserToGroup(callback open_im_sdk_callback.Base, groupID, reason string, userList sdk.InviteUserToGroupParam, operationID string) sdk.InviteUserToGroupCallback {
-	apiReq := api.InviteUserToGroupReq{}
-	apiReq.GroupID = groupID
-	apiReq.Reason = reason
-	apiReq.InvitedUserIDList = userList
-	apiReq.OperationID = operationID
-	var realData sdk.InviteUserToGroupCallback
-	g.p.PostFatalCallback(callback, constant.InviteUserToGroupRouter, apiReq, &realData, apiReq.OperationID)
-	//	g.SyncJoinedGroupList(operationID)
-	g.syncGroupMemberByGroupID(groupID, operationID, false)
-	return realData
-}
-
-// //1
-func (g *Group) getRecvGroupApplicationList(callback open_im_sdk_callback.Base, operationID string) sdk.GetGroupApplicationListCallback {
-	applicationList, err := g.db.GetAdminGroupApplication()
-	common.CheckDBErrCallback(callback, err, operationID)
-	return applicationList
-}
-
-func (g *Group) getSendGroupApplicationList(callback open_im_sdk_callback.Base, operationID string) sdk.GetSendGroupApplicationListCallback {
-	applicationList, err := g.db.GetSendGroupApplication()
-	common.CheckDBErrCallback(callback, err, operationID)
-	return applicationList
-}
-
 func (g *Group) getRecvGroupApplicationListFromSvr(operationID string) ([]*api.GroupRequest, error) {
 	apiReq := api.GetGroupApplicationListReq{}
 	apiReq.FromUserID = g.loginUserID
@@ -612,22 +556,6 @@ func (g *Group) getSendGroupApplicationListFromSvr(operationID string) ([]*api.G
 		return nil, utils.Wrap(err, apiReq.OperationID)
 	}
 	return realData, nil
-}
-
-func (g *Group) processGroupApplication(callback open_im_sdk_callback.Base, groupID, fromUserID, handleMsg string, handleResult int32, operationID string) {
-	apiReq := api.ApplicationGroupResponseReq{}
-	apiReq.GroupID = groupID
-	apiReq.OperationID = operationID
-	apiReq.FromUserID = fromUserID
-	apiReq.HandleResult = handleResult
-	apiReq.HandledMsg = handleMsg
-	if handleResult == constant.GroupResponseAgree {
-		g.p.PostFatalCallback(callback, constant.AcceptGroupApplicationRouter, apiReq, nil, apiReq.OperationID)
-		g.syncGroupMemberByGroupID(groupID, operationID, true)
-	} else if handleResult == constant.GroupResponseRefuse {
-		g.p.PostFatalCallback(callback, constant.RefuseGroupApplicationRouter, apiReq, nil, apiReq.OperationID)
-	}
-	g.SyncAdminGroupApplication(operationID)
 }
 
 func (g *Group) getJoinedGroupListFromSvr(operationID string) ([]*api.GroupInfo, error) {
@@ -676,19 +604,6 @@ func (g *Group) updateMemberCount(groupID string, operationID string) {
 			g.listener.OnGroupInfoChanged(utils.StructToJsonString(groupInfo))
 		}
 	}
-}
-
-func (g *Group) getGroupMembersInfoFromSvr(groupID string, memberList []string) ([]*api.GroupMemberFullInfo, error) {
-	var apiReq api.GetGroupMembersInfoReq
-	apiReq.OperationID = utils.OperationIDGenerator()
-	apiReq.GroupID = groupID
-	apiReq.MemberList = memberList
-	var realData []*api.GroupMemberFullInfo
-	err := g.p.PostReturn(constant.GetGroupMembersInfoRouter, apiReq, &realData)
-	if err != nil {
-		return nil, utils.Wrap(err, apiReq.OperationID)
-	}
-	return realData, nil
 }
 
 func (g *Group) SyncSelfGroupApplication(operationID string) {
@@ -859,6 +774,7 @@ func (g *Group) SyncAdminGroupApplication(operationID string) {
 //		}
 //		return result
 //	}
+
 func (g *Group) SyncJoinedGroupList(operationID string) {
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "args: ")
 	svrList, err := g.getJoinedGroupListFromSvr(operationID)
@@ -948,6 +864,7 @@ func (g *Group) SyncJoinedGroupList(operationID string) {
 	}
 }
 
+// //////////////////////
 func (g *Group) calculateGroupMemberHash(groupID string, operationID string) (uint64, error) {
 	userIDList, err := g.db.GetGroupMemberUIDListByGroupID(groupID)
 	if err != nil {
@@ -1134,6 +1051,7 @@ func (g *Group) syncGroupMemberByGroupID(groupID string, operationID string, onG
 //		wg.Wait()
 //		log.Info(operationID, "syncGroupMemberByGroupID end")
 //	}
+
 func (g *Group) GetNormalAndWorkingGroupIDList(operationID string) ([]string, error) {
 	groupList, err := g.db.GetJoinedGroupListDB()
 	if err != nil {
@@ -1148,6 +1066,7 @@ func (g *Group) GetNormalAndWorkingGroupIDList(operationID string) ([]string, er
 	return groupIDList, nil
 
 }
+
 func (g *Group) SyncJoinedGroupMemberForFirstLogin(operationID string) {
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "args: ")
 	groupList, err := g.GetNormalAndWorkingGroupIDList(operationID)
@@ -1170,18 +1089,6 @@ func (g *Group) SyncJoinedGroupMemberForFirstLogin(operationID string) {
 
 	wg.Wait()
 	log.Info(operationID, "syncGroupMemberByGroupID end")
-}
-
-func (g *Group) getGroupAllMemberByGroupIDFromSvr(groupID string, operationID string) ([]*api.GroupMemberFullInfo, error) {
-	var apiReq api.GetGroupAllMemberReq
-	apiReq.OperationID = operationID
-	apiReq.GroupID = groupID
-	var realData []*api.GroupMemberFullInfo
-	err := g.p.PostReturn(constant.GetGroupAllMemberListRouter, apiReq, &realData)
-	if err != nil {
-		return nil, utils.Wrap(err, apiReq.OperationID)
-	}
-	return realData, nil
 }
 
 func (g *Group) getGroupAllMemberSplitByGroupIDFromSvr(groupID string, operationID string) ([]*api.GroupMemberFullInfo, error) {
@@ -1207,25 +1114,4 @@ func (g *Group) getGroupAllMemberSplitByGroupIDFromSvr(groupID string, operation
 		page++
 	}
 	return result, nil
-}
-
-func (g *Group) setGroupMemberNickname(callback open_im_sdk_callback.Base, groupID, userID string, GroupMemberNickname string, operationID string) {
-	var apiReq api.SetGroupMemberNicknameReq
-	apiReq.OperationID = operationID
-	apiReq.GroupID = groupID
-	apiReq.UserID = userID
-	apiReq.Nickname = GroupMemberNickname
-	g.p.PostFatalCallback(callback, constant.SetGroupMemberNicknameRouter, apiReq, nil, apiReq.OperationID)
-
-	g.syncGroupMemberByGroupID(groupID, operationID, true)
-}
-
-func (g *Group) searchGroupMembers(callback open_im_sdk_callback.Base, searchParam sdk.SearchGroupMembersParam, operationID string) sdk.SearchGroupMembersCallback {
-	if len(searchParam.KeywordList) == 0 {
-		log.Error(operationID, "len keywordList == 0")
-		common.CheckArgsErrCallback(callback, errors.New("no keyword"), operationID)
-	}
-	members, err := g.db.SearchGroupMembersDB(searchParam.KeywordList[0], searchParam.GroupID, searchParam.IsSearchMemberNickname, searchParam.IsSearchUserID, searchParam.Offset, searchParam.Count)
-	common.CheckDBErrCallback(callback, err, operationID)
-	return members
 }
