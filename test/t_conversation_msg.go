@@ -865,12 +865,6 @@ func DoTestSendImageMsg(recvID string) {
 	open_im_sdk.SendMessage(&testSendMsg, operationID, s, recvID, "", utils.StructToJsonString(o))
 }
 
-func DotestUploadFile() {
-	operationID := utils.OperationIDGenerator()
-	var testSendMsg TestSendMsgCallBack
-	open_im_sdk.UploadFile(&testSendMsg, operationID, "C:\\Users\\Administrator\\Desktop\\video_test.mp4")
-}
-
 func DoTestSendOtherMsg(sendId, recvID string) {
 	operationID := utils.OperationIDGenerator()
 	s := DoTestCreateOtherMessageFromFullPath()

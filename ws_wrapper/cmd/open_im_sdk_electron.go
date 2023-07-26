@@ -19,13 +19,12 @@ import (
 
 func main() {
 	var sdkWsPort *int
-	var openIMWsAddress, openIMApiAddress, openIMDbDir, objectStorage, encryptionKey *string
+	var openIMWsAddress, openIMApiAddress, openIMDbDir, encryptionKey *string
 
 	sdkWsPort = flag.Int("sdkWsPort", 7788, "openIMSDK ws listening port")
 	openIMApiAddress = flag.String("openIMApiAddress", "", "openIM api listening port")
 	openIMWsAddress = flag.String("openIMWsAddress", "", "openIM ws listening port")
 	openIMDbDir = flag.String("openIMDbDir", "./", "openIM db dir")
-	objectStorage = flag.String("objectStorage", "cos", "openIM objectStorage")
 	encryptionKey = flag.String("encryptionKey", "", "openIM encryptionKey")
 	flag.Parse()
 
@@ -35,14 +34,14 @@ func main() {
 
 	case "darwin":
 		ws_local_server.InitServer(&sdk_struct.IMConfig{ApiAddr: *openIMApiAddress,
-			WsAddr: *openIMWsAddress, Platform: utils.OSXPlatformID, DataDir: *openIMDbDir, ObjectStorage: *objectStorage, EncryptionKey: *encryptionKey})
+			WsAddr: *openIMWsAddress, Platform: utils.OSXPlatformID, DataDir: *openIMDbDir, EncryptionKey: *encryptionKey})
 
 	case "linux":
 		ws_local_server.InitServer(&sdk_struct.IMConfig{ApiAddr: *openIMApiAddress,
-			WsAddr: *openIMWsAddress, Platform: utils.LinuxPlatformID, DataDir: *openIMDbDir, ObjectStorage: *objectStorage, EncryptionKey: *encryptionKey})
+			WsAddr: *openIMWsAddress, Platform: utils.LinuxPlatformID, DataDir: *openIMDbDir, EncryptionKey: *encryptionKey})
 	case "windows":
 		ws_local_server.InitServer(&sdk_struct.IMConfig{ApiAddr: *openIMApiAddress,
-			WsAddr: *openIMWsAddress, Platform: utils.WindowsPlatformID, DataDir: *openIMDbDir, ObjectStorage: *objectStorage, EncryptionKey: *encryptionKey})
+			WsAddr: *openIMWsAddress, Platform: utils.WindowsPlatformID, DataDir: *openIMDbDir, EncryptionKey: *encryptionKey})
 	default:
 		fmt.Println("this os not support", sysType)
 

@@ -683,68 +683,9 @@ func (c *Conversation) SendMessage(callback open_im_sdk_callback.SendMsgCallBack
 		if s.Status != constant.MsgStatusSendSuccess { //filter forward message
 			switch s.ContentType {
 			case constant.Picture:
-				var sourcePath string
-				if utils.FileExist(s.PictureElem.SourcePath) {
-					sourcePath = s.PictureElem.SourcePath
-					delFile = append(delFile, utils.FileTmpPath(s.PictureElem.SourcePath, c.DataDir))
-				} else {
-					sourcePath = utils.FileTmpPath(s.PictureElem.SourcePath, c.DataDir)
-					delFile = append(delFile, sourcePath)
-				}
-				log.Info(operationID, "file", sourcePath, delFile)
-				sourceUrl, uuid, err := c.UploadImage(sourcePath, callback.OnProgress)
-				c.checkErrAndUpdateMessage(callback, 301, err, &s, lc, operationID)
-				s.PictureElem.SourcePicture.Url = sourceUrl
-				s.PictureElem.SourcePicture.UUID = uuid
-				s.PictureElem.SnapshotPicture.Url = sourceUrl + "?imageView2/2/w/" + constant.ZoomScale + "/h/" + constant.ZoomScale
-				s.PictureElem.SnapshotPicture.Width = int32(utils.StringToInt(constant.ZoomScale))
-				s.PictureElem.SnapshotPicture.Height = int32(utils.StringToInt(constant.ZoomScale))
-				s.Content = utils.StructToJsonString(s.PictureElem)
-
 			case constant.Voice:
-				var sourcePath string
-				if utils.FileExist(s.SoundElem.SoundPath) {
-					sourcePath = s.SoundElem.SoundPath
-					delFile = append(delFile, utils.FileTmpPath(s.SoundElem.SoundPath, c.DataDir))
-				} else {
-					sourcePath = utils.FileTmpPath(s.SoundElem.SoundPath, c.DataDir)
-					delFile = append(delFile, sourcePath)
-				}
-				log.Info(operationID, "file", sourcePath, delFile)
-				soundURL, uuid, err := c.UploadSound(sourcePath, callback.OnProgress)
-				c.checkErrAndUpdateMessage(callback, 301, err, &s, lc, operationID)
-				s.SoundElem.SourceURL = soundURL
-				s.SoundElem.UUID = uuid
-				s.Content = utils.StructToJsonString(s.SoundElem)
-
 			case constant.Video:
-				var videoPath string
-				var snapPath string
-				if utils.FileExist(s.VideoElem.VideoPath) {
-					videoPath = s.VideoElem.VideoPath
-					snapPath = s.VideoElem.SnapshotPath
-					delFile = append(delFile, utils.FileTmpPath(s.VideoElem.VideoPath, c.DataDir))
-					delFile = append(delFile, utils.FileTmpPath(s.VideoElem.SnapshotPath, c.DataDir))
-				} else {
-					videoPath = utils.FileTmpPath(s.VideoElem.VideoPath, c.DataDir)
-					snapPath = utils.FileTmpPath(s.VideoElem.SnapshotPath, c.DataDir)
-					delFile = append(delFile, videoPath)
-					delFile = append(delFile, snapPath)
-				}
-				log.Info(operationID, "file: ", videoPath, snapPath, delFile)
-				snapshotURL, snapshotUUID, videoURL, videoUUID, err := c.UploadVideo(videoPath, snapPath, callback.OnProgress)
-				c.checkErrAndUpdateMessage(callback, 301, err, &s, lc, operationID)
-				s.VideoElem.VideoURL = videoURL
-				s.VideoElem.SnapshotUUID = snapshotUUID
-				s.VideoElem.SnapshotURL = snapshotURL
-				s.VideoElem.VideoUUID = videoUUID
-				s.Content = utils.StructToJsonString(s.VideoElem)
 			case constant.File:
-				fileURL, fileUUID, err := c.UploadFile(s.FileElem.FilePath, callback.OnProgress)
-				c.checkErrAndUpdateMessage(callback, 301, err, &s, lc, operationID)
-				s.FileElem.SourceURL = fileURL
-				s.FileElem.UUID = fileUUID
-				s.Content = utils.StructToJsonString(s.FileElem)
 			case constant.Text:
 			case constant.AtText:
 			case constant.Location:
@@ -980,38 +921,9 @@ func (c *Conversation) SendMessageByBuffer(callback open_im_sdk_callback.SendMsg
 		if s.Status != constant.MsgStatusSendSuccess { //filter forward message
 			switch s.ContentType {
 			case constant.Picture:
-				sourceUrl, uuid, err := c.UploadImageByBuffer(buffer1, s.PictureElem.SourcePicture.Size, s.PictureElem.SourcePicture.Type, callback.OnProgress)
-				c.checkErrAndUpdateMessage(callback, 301, err, &s, lc, operationID)
-				s.PictureElem.SourcePicture.Url = sourceUrl
-				s.PictureElem.SourcePicture.UUID = uuid
-				s.PictureElem.SnapshotPicture.Url = sourceUrl + "?imageView2/2/w/" + constant.ZoomScale + "/h/" + constant.ZoomScale
-				s.PictureElem.SnapshotPicture.Width = int32(utils.StringToInt(constant.ZoomScale))
-				s.PictureElem.SnapshotPicture.Height = int32(utils.StringToInt(constant.ZoomScale))
-				s.Content = utils.StructToJsonString(s.PictureElem)
-
 			case constant.Voice:
-				soundURL, uuid, err := c.UploadSoundByBuffer(buffer1, s.SoundElem.DataSize, "sound", callback.OnProgress)
-				c.checkErrAndUpdateMessage(callback, 301, err, &s, lc, operationID)
-				s.SoundElem.SourceURL = soundURL
-				s.SoundElem.UUID = uuid
-				s.Content = utils.StructToJsonString(s.SoundElem)
-
 			case constant.Video:
-
-				snapshotURL, snapshotUUID, videoURL, videoUUID, err := c.UploadVideoByBuffer(buffer1, buffer2, s.VideoElem.VideoSize,
-					s.VideoElem.SnapshotSize, s.VideoElem.VideoType, callback.OnProgress)
-				c.checkErrAndUpdateMessage(callback, 301, err, &s, lc, operationID)
-				s.VideoElem.VideoURL = videoURL
-				s.VideoElem.SnapshotUUID = snapshotUUID
-				s.VideoElem.SnapshotURL = snapshotURL
-				s.VideoElem.VideoUUID = videoUUID
-				s.Content = utils.StructToJsonString(s.VideoElem)
 			case constant.File:
-				fileURL, fileUUID, err := c.UploadFileByBuffer(buffer1, s.FileElem.FileSize, "file", callback.OnProgress)
-				c.checkErrAndUpdateMessage(callback, 301, err, &s, lc, operationID)
-				s.FileElem.SourceURL = fileURL
-				s.FileElem.UUID = fileUUID
-				s.Content = utils.StructToJsonString(s.FileElem)
 			case constant.Text:
 			case constant.AtText:
 			case constant.Location:

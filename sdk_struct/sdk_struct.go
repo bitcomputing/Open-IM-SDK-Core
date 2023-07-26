@@ -226,12 +226,12 @@ func (n NewMsgList) Len() int {
 	return len(n)
 }
 
-//Implement the sort.Interface interface comparison element method
+// Implement the sort.Interface interface comparison element method
 func (n NewMsgList) Less(i, j int) bool {
 	return n[i].SendTime < n[j].SendTime
 }
 
-//Implement the sort.Interface interface exchange element method
+// Implement the sort.Interface interface exchange element method
 func (n NewMsgList) Swap(i, j int) {
 	n[i], n[j] = n[j], n[i]
 }
@@ -242,7 +242,6 @@ type IMConfig struct {
 	WsAddr               string `json:"ws_addr"`
 	DataDir              string `json:"data_dir"`
 	LogLevel             uint32 `json:"log_level"`
-	ObjectStorage        string `json:"object_storage"` //"cos"(default)  "oss"
 	EncryptionKey        string `json:"encryption_key"`
 	IsCompression        bool   `json:"is_compression"`
 	IsExternalExtensions bool   `json:"is_external_extensions"`

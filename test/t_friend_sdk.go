@@ -290,7 +290,6 @@ func InOutDoTest(uid, tk, ws, api string) {
 	cf.WsAddr = ws
 	cf.DataDir = "./"
 	cf.LogLevel = LogLevel
-	cf.ObjectStorage = "minio"
 	cf.IsCompression = true
 	cf.IsExternalExtensions = true
 

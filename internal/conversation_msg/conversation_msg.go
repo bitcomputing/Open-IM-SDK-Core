@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"open_im_sdk/internal/business"
 	"open_im_sdk/internal/cache"
-	common2 "open_im_sdk/internal/common"
 	"open_im_sdk/internal/friend"
 	"open_im_sdk/internal/full"
 	"open_im_sdk/internal/group"
@@ -52,8 +51,7 @@ type Conversation struct {
 	group                *group.Group
 	user                 *user.User
 	//advancedFunction     advanced_interface.AdvancedFunction
-	business     *business.Business
-	common2.ObjectStorage
+	business *business.Business
 
 	cache          *cache.Cache
 	full           *full.Full
@@ -91,11 +89,11 @@ func (c *Conversation) SetBatchMsgListener(batchMsgListener open_im_sdk_callback
 func NewConversation(ws *ws.Ws, db db_interface.DataBase, p *ws.PostApi,
 	ch chan common.Cmd2Value, loginUserID string, platformID int32, dataDir, encryptionKey string,
 	friend *friend.Friend, group *group.Group, user *user.User,
-	objectStorage common2.ObjectStorage, conversationListener open_im_sdk_callback.OnConversationListener,
+	conversationListener open_im_sdk_callback.OnConversationListener,
 	msgListener open_im_sdk_callback.OnAdvancedMsgListener,
 	business *business.Business, cache *cache.Cache, full *full.Full, id2MinSeq map[string]uint32, isExternalExtensions bool) *Conversation {
 	n := &Conversation{Ws: ws, db: db, p: p, recvCH: ch, loginUserID: loginUserID, platformID: platformID,
-		DataDir: dataDir, friend: friend, group: group, user: user, ObjectStorage: objectStorage,
+		DataDir: dataDir, friend: friend, group: group, user: user,
 		full: full, id2MinSeq: id2MinSeq, encryptionKey: encryptionKey, business: business, IsExternalExtensions: isExternalExtensions}
 	n.SetMsgListener(msgListener)
 	n.SetConversationListener(conversationListener)

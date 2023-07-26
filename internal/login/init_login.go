@@ -3,7 +3,6 @@ package login
 import (
 	"open_im_sdk/internal/business"
 	"open_im_sdk/internal/cache"
-	comm3 "open_im_sdk/internal/common"
 	conv "open_im_sdk/internal/conversation_msg"
 	"open_im_sdk/internal/friend"
 	"open_im_sdk/internal/full"
@@ -247,8 +246,7 @@ func (u *LoginMgr) login(userID, token string, cb open_im_sdk_callback.Base, ope
 	if u.businessListener != nil {
 		u.business.SetListener(u.businessListener)
 	}
-	log.NewInfo(operationID, u.imConfig.ObjectStorage, "new obj login cost time: ", time.Since(t1))
-	log.NewInfo(operationID, u.imConfig.ObjectStorage, "SyncLoginUserInfo login cost time: ", time.Since(t1))
+
 	u.push = comm2.NewPush(p, u.imConfig.Platform, u.loginUserID)
 	go u.forcedSynchronization()
 
@@ -260,21 +258,10 @@ func (u *LoginMgr) login(userID, token string, cb open_im_sdk_callback.Base, ope
 	u.ws = ws.NewWs(wsRespAsyn, wsConn, u.cmdWsCh, u.pushMsgAndMaxSeqCh, u.heartbeatCmdCh, u.conversationCh)
 	u.msgSync = ws.NewMsgSync(u.db, u.ws, u.loginUserID, u.conversationCh, u.pushMsgAndMaxSeqCh, u.joinedSuperGroupCh)
 	u.heartbeat = heartbeart.NewHeartbeat(u.msgSync, u.heartbeatCmdCh, u.connListener, u.token, u.id2MinSeq, u.full)
-	log.NewInfo(operationID, u.imConfig.ObjectStorage)
-
-	var objStorage comm3.ObjectStorage
-	switch u.imConfig.ObjectStorage {
-	case "cos":
-		objStorage = comm2.NewCOS(u.postApi)
-	case "minio":
-		objStorage = comm2.NewMinio(u.postApi)
-	default:
-		objStorage = comm2.NewCOS(u.postApi)
-	}
 
 	u.conversation = conv.NewConversation(u.ws, u.db, u.postApi, u.conversationCh,
 		u.loginUserID, u.imConfig.Platform, u.imConfig.DataDir, u.imConfig.EncryptionKey,
-		u.friend, u.group, u.user, objStorage, u.conversationListener, u.advancedMsgListener,
+		u.friend, u.group, u.user, u.conversationListener, u.advancedMsgListener,
 		u.business, u.cache, u.full, u.id2MinSeq, u.imConfig.IsExternalExtensions)
 	if u.batchMsgListener != nil {
 		u.conversation.SetBatchMsgListener(u.batchMsgListener)
@@ -453,37 +440,4 @@ func CheckToken(userID, token string, operationID string) (error, uint32) {
 	//}
 	exp, err := user.ParseTokenFromSvr(operationID)
 	return err, exp
-}
-
-func (u *LoginMgr) uploadImage(callback open_im_sdk_callback.Base, filePath string, token, obj string, operationID string) string {
-	p := ws.NewPostApi(token, u.ImConfig().ApiAddr)
-	var o comm3.ObjectStorage
-	switch obj {
-	case "cos":
-		o = comm2.NewCOS(p)
-	case "minio":
-		o = comm2.NewMinio(p)
-	default:
-		o = comm2.NewCOS(p)
-	}
-	url, _, err := o.UploadImage(filePath, func(progress int) {
-		if progress == 100 {
-			callback.OnSuccess("")
-		}
-	})
-	if err != nil {
-		log.Error(operationID, "UploadImage failed ", err.Error(), filePath)
-		return ""
-	}
-	return url
-}
-
-func (u LoginMgr) uploadFile(callback open_im_sdk_callback.SendMsgCallBack, filePath, operationID string) {
-	url, _, err := u.conversation.UploadFile(filePath, callback.OnProgress)
-	log.NewInfo(operationID, utils.GetSelfFuncName(), url)
-	if err != nil {
-		log.Error(operationID, "UploadImage failed ", err.Error(), filePath)
-		callback.OnError(constant.ErrApi.ErrCode, err.Error())
-	}
-	callback.OnSuccess(url)
 }
