@@ -4,14 +4,6 @@ import (
 	"open_im_sdk/open_im_sdk"
 )
 
-func (wsRouter *WsFuncRouter) GetUsersInfo(userIDList string, operationID string) {
-	userWorker := open_im_sdk.GetUserWorker(wsRouter.uId)
-	if !wsRouter.checkResourceLoadingAndKeysIn(userWorker, userIDList, operationID, runFuncName(), nil) {
-		return
-	}
-	userWorker.Full().GetUsersInfo(&BaseSuccessFailed{runFuncName(), operationID, wsRouter.uId}, userIDList, operationID)
-}
-
 func (wsRouter *WsFuncRouter) SetSelfInfo(userInfo string, operationID string) {
 	userWorker := open_im_sdk.GetUserWorker(wsRouter.uId)
 	if !wsRouter.checkResourceLoadingAndKeysIn(userWorker, userInfo, operationID, runFuncName(), nil) {

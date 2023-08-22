@@ -672,6 +672,7 @@ func (c *Conversation) getAdvancedHistoryMessageList(callback open_im_sdk_callba
 		if err != nil {
 			messageListCallback.ErrCode = 100
 			messageListCallback.ErrMsg = "conversation get err"
+
 			return messageListCallback
 		}
 		switch lc.ConversationType {

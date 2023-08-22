@@ -131,6 +131,5 @@ func registerFunc() {
 	wrapperUser := wasm_wrapper.NewWrapperUser(globalFuc)
 	js.Global().Set("getSelfUserInfo", js.FuncOf(wrapperUser.GetSelfUserInfo))
 	js.Global().Set("setSelfInfo", js.FuncOf(wrapperUser.SetSelfInfo))
-	js.Global().Set("getUsersInfo", js.FuncOf(wrapperUser.GetUsersInfo))
 
 }

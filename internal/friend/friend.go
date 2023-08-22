@@ -21,7 +21,6 @@ import (
 	"open_im_sdk/open_im_sdk_callback"
 	"open_im_sdk/pkg/common"
 	"open_im_sdk/pkg/db/db_interface"
-	"open_im_sdk/pkg/db/model_struct"
 	"open_im_sdk/pkg/log"
 	"open_im_sdk/pkg/utils"
 )
@@ -73,16 +72,4 @@ func (f *Friend) GetUserNameAndFaceUrlByUid(friendUserID, operationID string) (f
 		log.Info(operationID, "GetUsersInfoFromSvr ", friendUserID)
 	}
 	return "", "", errors.New("getUserNameAndFaceUrlByUid err"), isFromSvr
-}
-
-func (f *Friend) GetDesignatedFriendListInfo(callback open_im_sdk_callback.Base, friendUserIDList []string, operationID string) []*model_struct.LocalFriend {
-	friendList, err := f.db.GetFriendInfoList(friendUserIDList)
-	common.CheckDBErrCallback(callback, err, operationID)
-	return friendList
-}
-
-func (f *Friend) GetDesignatedBlackListInfo(callback open_im_sdk_callback.Base, blackIDList []string, operationID string) []*model_struct.LocalBlack {
-	blackList, err := f.db.GetBlackInfoList(blackIDList)
-	common.CheckDBErrCallback(callback, err, operationID)
-	return blackList
 }
