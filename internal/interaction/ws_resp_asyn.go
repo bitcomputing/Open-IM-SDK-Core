@@ -121,6 +121,14 @@ func (u *WsRespAsyn) closeAllCh() {
 	u.wsMutex.Lock()
 	defer u.wsMutex.Unlock()
 	for _, ch := range u.wsNotification {
-		close(ch)
+		// close(ch)
+		log.Debug("1111", "closeAllChcloseAllChcloseAllChcloseAllChcloseAllChcloseAllCh","1","2")
+		select {
+		case _, ok := <-ch:
+			if ok {
+				close(ch)
+			}
+		default:
+		}
 	}
 }
